@@ -1,20 +1,22 @@
 package practicum.taskmanager;
 
 public class Task {
-    private int id;
-    private String name;
-    private String description = "";
-    private TaskStatus status;
+    protected int id;
+    protected String name;
+    protected String description;
+    protected TaskStatus status;
 
     public Task(String name, TaskStatus status) {
         this.name = name;
         this.status = status;
+        description = "";
     }
 
     public Task(int id, String name, TaskStatus status) {
         this.id = id;
         this.name = name;
         this.status = status;
+        description = "";
     }
 
     public int getId() {

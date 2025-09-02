@@ -26,13 +26,13 @@ public class TaskManager {
         return tasks.get(id);
     }
 
-    public ResultOfCreation createTask(Task newTask) {
+    public int createTask(Task newTask) {
 
         int newId = getNextId();
         newTask.setId(newId);
         tasks.put(newId, newTask);
 
-        return ResultOfCreation.SUCCESS;
+        return newId;
     }
 
     public UpdateResult updateTask(Task task) {
@@ -69,22 +69,24 @@ public class TaskManager {
         return epics.get(id);
     }
 
-    public ResultOfCreation createEpic(Epic newEpic) {
+    public int createEpic(Epic newEpic) {
 
         int newId = getNextId();
         newEpic.setId(newId);
         epics.put(newId, newEpic);
 
-        return ResultOfCreation.SUCCESS;
+        return newId;
     }
 
     public UpdateResult updateEpic(Epic epic) {
 
         int epicId = epic.getId();
-        if (!epics.containsKey(epicId)) {
+        Epic storedEpic = epics.get(epicId);
+        if (storedEpic == null) {
             return UpdateResult.WRONG_TASK_ID;
         }
-        epics.put(epicId, epic);
+        storedEpic.setName(epic.getName());
+        storedEpic.setDescription(epic.getDescription());
 
         return UpdateResult.SUCCESS;
     }
@@ -110,10 +112,10 @@ public class TaskManager {
     }
 
     public void clearSubtasks() {
-
-        ArrayList<Integer> listOfKeys = new ArrayList<>(subtasks.keySet());
-        for (Integer i : listOfKeys) {
-            deleteSubtaskById(i);
+        subtasks.clear();
+        for (Epic epic : epics.values()) {
+            epic.clearSubtasksId();
+            calculateAndSetEpicStatus(epic);
         }
     }
 
@@ -121,34 +123,37 @@ public class TaskManager {
         return subtasks.get(id);
     }
 
-    public ResultOfCreation createSubtask(Subtask newSubtask) {
+    public int createSubtask(Subtask newSubtask) {
 
         Epic epic = epics.get(newSubtask.getEpicId());
         if (epic == null) {
-            return ResultOfCreation.WRONG_EPIC_ID;
+            return -1;
         }
         int newId = getNextId();
         newSubtask.setId(newId);
         subtasks.put(newId, newSubtask);
 
-        ArrayList<Integer> epicsSubtasksId = epic.getListOfSubtasksId();
-        epicsSubtasksId.add(newSubtask.getId());
+        epic.addSubtaskId(newId);
         calculateAndSetEpicStatus(epic);
 
-        return ResultOfCreation.SUCCESS;
+        return newId;
     }
 
     public UpdateResult updateSubtask(Subtask subtask) {
 
         int subtaskId = subtask.getId();
-        if (!subtasks.containsKey(subtaskId)) {
+        Subtask storedSubtask = subtasks.get(subtaskId);
+
+        if (storedSubtask == null) {
             return UpdateResult.WRONG_TASK_ID;
         }
+
         int epicId = subtask.getEpicId();
-        if (!epics.containsKey(epicId)) {
+        Epic epic = epics.get(epicId);
+
+        if (epic == null || storedSubtask.getEpicId() != epicId) {
             return UpdateResult.WRONG_EPIC_ID;
         }
-        Epic epic = epics.get(epicId);
 
         subtasks.put(subtaskId, subtask);
         calculateAndSetEpicStatus(epic);
@@ -165,7 +170,7 @@ public class TaskManager {
 
         Epic epic = epics.get(subtask.getEpicId());
 
-        epic.getListOfSubtasksId().remove(Integer.valueOf(id));
+        epic.deleteSubtaskId(id);
         subtasks.remove(id);
 
         calculateAndSetEpicStatus(epic);
@@ -173,8 +178,14 @@ public class TaskManager {
         return ResultOfDeletion.SUCCESS;
     }
 
-    public ArrayList<Subtask> getSubtasksOfEpic(Epic epic) {
+    public ArrayList<Subtask> getSubtasksOfEpic(int epicId) {
         ArrayList<Subtask> result = new ArrayList<>();
+
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            return result;
+        }
+
         for (int subtaskId : epic.getListOfSubtasksId()) {
             Subtask subtask = subtasks.get(subtaskId);
             result.add(subtask);
@@ -182,7 +193,7 @@ public class TaskManager {
         return result;
     }
 
-    public void calculateAndSetEpicStatus(Epic epic) {
+    private void calculateAndSetEpicStatus(Epic epic) {
 
        boolean hasIncompletedTasks = false;
        boolean hasOnlyNewTasks = true;

@@ -31,7 +31,7 @@ public class Main {
 //        taskManager.createSubtask(subtask12);
 //
 //        System.out.println("3. Эпик 1 в статусе IN_PROGRESS: " + epic1);
-//        System.out.println("4. Подзадачи эпика 1 в статусах NEW и IN_PROGRESS: " + taskManager.getSubtasksOfEpic(epic1));
+//        System.out.println("4. Подзадачи эпика 1 в статусах NEW и IN_PROGRESS: " + taskManager.getSubtasksOfEpic(epic1.getId()));
 //
 //        Epic epic2 = new Epic("Эпик2.");
 //        taskManager.createEpic(epic2);
@@ -39,7 +39,7 @@ public class Main {
 //        taskManager.createSubtask(subtask21);
 //
 //        System.out.println("4. Эпик 2 в статусе NEW: " + epic2);
-//        System.out.println("5. Подзадача эпика 2 в статусе NEW: " + taskManager.getSubtasksOfEpic(epic2));
+//        System.out.println("5. Подзадача эпика 2 в статусе NEW: " + taskManager.getSubtasksOfEpic(epic2.getId()));
 //        System.out.println("6. Список эпиков: " + taskManager.getEpicsList());
 //        System.out.println("7. Список всех подзадач с id эпиков: " + taskManager.getSubtasksList());
 //
