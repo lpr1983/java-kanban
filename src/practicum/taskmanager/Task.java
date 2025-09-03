@@ -6,17 +6,17 @@ public class Task {
     protected String description;
     protected TaskStatus status;
 
-    public Task(String name, TaskStatus status) {
+    public Task(String name, TaskStatus status, String description) {
         this.name = name;
         this.status = status;
-        description = "";
+        this.description = description;
     }
 
-    public Task(int id, String name, TaskStatus status) {
+    public Task(int id, String name, TaskStatus status, String description) {
         this.id = id;
         this.name = name;
         this.status = status;
-        description = "";
+        this.description = description;
     }
 
     public int getId() {

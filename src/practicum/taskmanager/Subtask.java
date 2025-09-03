@@ -3,13 +3,13 @@ package practicum.taskmanager;
 public class Subtask extends Task {
     private final int epicId;
 
-    public Subtask(String name, TaskStatus status, int epicId) {
-        super(name, status);
+    public Subtask(String name, TaskStatus status, int epicId, String description) {
+        super(name, status, description);
         this.epicId = epicId;
     }
 
-    public Subtask(int id, String name, TaskStatus status, int epicId) {
-        super(id, name, status);
+    public Subtask(int id, String name, TaskStatus status, int epicId, String description) {
+        super(id, name, status, description);
         this.epicId = epicId;
     }
 

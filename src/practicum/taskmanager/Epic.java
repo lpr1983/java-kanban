@@ -5,12 +5,12 @@ import java.util.ArrayList;
 public class Epic extends Task {
     private final ArrayList<Integer> listOfSubtasksId = new ArrayList<>();
 
-    public Epic(int id, String name) {
-        super(id, name, TaskStatus.NEW);
+    public Epic(int id, String name, String description) {
+        super(id, name, TaskStatus.NEW, description);
     }
 
-    public Epic(String name) {
-        super(name, TaskStatus.NEW);
+    public Epic(String name, String description) {
+        super(name, TaskStatus.NEW, description);
     }
 
     protected ArrayList<Integer> getListOfSubtasksId() {
@@ -47,7 +47,7 @@ public class Epic extends Task {
         return "Epic{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", description.length='" + description + '\'' +
+                ", description.length='" + description.length() + '\'' +
                 ", status=" + status +
                 '}';
     }
