@@ -265,6 +265,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
+    public ArrayList<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
     private Task copyTask(Task task) {
         return new Task(task.getId(), task.getName(), task.getStatus(), task.getDescription());
     }
