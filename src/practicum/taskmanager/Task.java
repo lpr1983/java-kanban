@@ -1,5 +1,7 @@
 package practicum.taskmanager;
 
+import java.util.Objects;
+
 public class Task {
     protected int id;
     protected String name;
@@ -59,5 +61,17 @@ public class Task {
                 ", description.length='" + description.length() + '\'' +
                 ", status=" + status +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
