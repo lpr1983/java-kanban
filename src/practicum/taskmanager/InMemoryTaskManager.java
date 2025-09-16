@@ -256,6 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
             Subtask subtask = copySubtask(subtasks.get(subtaskId));
             result.add(subtask);
         }
+
         return result;
     }
 
