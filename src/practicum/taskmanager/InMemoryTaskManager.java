@@ -8,6 +8,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
     private final HashMap<Integer, Subtask> subtasks = new HashMap<>();
+    private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private int getNextId() {
         numerator++;
@@ -26,7 +27,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTaskById(int id) {
-        return tasks.get(id);
+
+        Task task = tasks.get(id);
+        if (task == null) {
+            return null;
+        }
+        // Согласно требованию о том, что история просмотров хранит версии на момент вызова
+        // метода получения задачи.
+        Task taskCopy = copyTask(task);
+        historyManager.add(taskCopy);
+
+        return task;
     }
 
     @Override
@@ -75,7 +86,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Epic getEpicById(int id) {
-        return epics.get(id);
+
+        Epic epic = epics.get(id);
+        if (epic == null) {
+            return null;
+        }
+
+        Task epicCopy = copyEpic(epic);
+        historyManager.add(epicCopy);
+
+        return epic;
     }
 
     @Override
@@ -135,7 +155,16 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Subtask getSubtaskById(int id) {
-        return subtasks.get(id);
+
+        Subtask subtask = subtasks.get(id);
+        if (subtask == null) {
+            return null;
+        }
+
+        Subtask copySubtask = copySubtask(subtask);
+        historyManager.add(copySubtask);
+
+        return subtask;
     }
 
     @Override
@@ -234,5 +263,25 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setCalculatedStatus(TaskStatus.DONE);
         }
+    }
+
+    private Task copyTask(Task task) {
+        Task copyTask = new Task(task.getId(), task.getName(), task.getStatus(), task.getDescription());
+        return copyTask;
+    }
+
+    private Epic copyEpic(Epic epic) {
+        Epic copyEpic = new Epic(epic.getId(), epic.getName(), epic.getDescription());
+        copyEpic.setCalculatedStatus(epic.getStatus());
+        for (Integer id : epic.getListOfSubtasksId()) {
+            copyEpic.addSubtaskId(id);
+        }
+        return copyEpic;
+    }
+
+    private Subtask copySubtask(Subtask subtask) {
+        Subtask copySubtask = new Subtask(subtask.getId(), subtask.getName(), subtask.getStatus(),
+                subtask.getEpicId(), subtask.getDescription());
+        return copySubtask;
     }
 }
