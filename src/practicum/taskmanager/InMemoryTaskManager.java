@@ -260,6 +260,11 @@ public class InMemoryTaskManager implements TaskManager {
         return result;
     }
 
+    @Override
+    public ArrayList<Task> getHistory() {
+        return historyManager.getHistory();
+    }
+
     private void calculateAndSetEpicStatus(Epic epic) {
 
        boolean hasIncompletedTasks = false;
@@ -282,11 +287,6 @@ public class InMemoryTaskManager implements TaskManager {
         } else {
             epic.setCalculatedStatus(TaskStatus.DONE);
         }
-    }
-
-    @Override
-    public ArrayList<Task> getHistory() {
-        return historyManager.getHistory();
     }
 
     private Task copyTask(Task task) {
