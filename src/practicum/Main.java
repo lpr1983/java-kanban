@@ -25,6 +25,10 @@ public class Main {
         task = taskManager.getTaskById(taskId);
         task.setStatus(TaskStatus.IN_PROGRESS);
         task.setDescription("Changed description");
+        taskManager.updateTask(task);
+
+        // Разработчик не изменит таким образом состояние объекта в менеджере
+        task.setStatus(TaskStatus.DONE);
 
         Epic epic = new Epic("Epic 1", "Epic desription");
         int epicId = taskManager.createEpic(epic);
