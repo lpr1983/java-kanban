@@ -3,7 +3,7 @@ package practicum.taskmanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class InMemoryTaskManager {
+public class InMemoryTaskManager implements TaskManager {
     private int numerator = 0;
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
@@ -14,18 +14,22 @@ public class InMemoryTaskManager {
         return numerator;
     }
 
+    @Override
     public ArrayList<Task> getTasksList() {
         return new ArrayList<>(tasks.values());
     }
 
+    @Override
     public void clearTasks() {
         tasks.clear();
     }
 
+    @Override
     public Task getTaskById(int id) {
         return tasks.get(id);
     }
 
+    @Override
     public int createTask(Task newTask) {
 
         int newId = getNextId();
@@ -35,6 +39,7 @@ public class InMemoryTaskManager {
         return newId;
     }
 
+    @Override
     public UpdateResult updateTask(Task task) {
 
         int taskId = task.getId();
@@ -46,6 +51,7 @@ public class InMemoryTaskManager {
         return UpdateResult.SUCCESS;
     }
 
+    @Override
     public ResultOfDeletion deleteTaskById(int id) {
         if (!tasks.containsKey(id)) {
             return ResultOfDeletion.WRONG_TASK_ID;
@@ -56,19 +62,23 @@ public class InMemoryTaskManager {
         return ResultOfDeletion.SUCCESS;
     }
 
+    @Override
     public ArrayList<Task> getEpicsList() {
         return new ArrayList<>(epics.values());
     }
 
+    @Override
     public void clearEpics() {
         epics.clear();
         subtasks.clear();
     }
 
+    @Override
     public Epic getEpicById(int id) {
         return epics.get(id);
     }
 
+    @Override
     public int createEpic(Epic newEpic) {
 
         int newId = getNextId();
@@ -78,6 +88,7 @@ public class InMemoryTaskManager {
         return newId;
     }
 
+    @Override
     public UpdateResult updateEpic(Epic epic) {
 
         int epicId = epic.getId();
@@ -91,6 +102,7 @@ public class InMemoryTaskManager {
         return UpdateResult.SUCCESS;
     }
 
+    @Override
     public ResultOfDeletion deleteEpicById(int id) {
 
         Epic epic = epics.get(id);
@@ -107,10 +119,12 @@ public class InMemoryTaskManager {
         return ResultOfDeletion.SUCCESS;
     }
 
+    @Override
     public ArrayList<Task> getSubtasksList() {
         return new ArrayList<>(subtasks.values());
     }
 
+    @Override
     public void clearSubtasks() {
         subtasks.clear();
         for (Epic epic : epics.values()) {
@@ -119,10 +133,12 @@ public class InMemoryTaskManager {
         }
     }
 
+    @Override
     public Subtask getSubtaskById(int id) {
         return subtasks.get(id);
     }
 
+    @Override
     public int createSubtask(Subtask newSubtask) {
 
         Epic epic = epics.get(newSubtask.getEpicId());
@@ -139,6 +155,7 @@ public class InMemoryTaskManager {
         return newId;
     }
 
+    @Override
     public UpdateResult updateSubtask(Subtask subtask) {
 
         int subtaskId = subtask.getId();
@@ -161,6 +178,7 @@ public class InMemoryTaskManager {
         return UpdateResult.SUCCESS;
     }
 
+    @Override
     public ResultOfDeletion deleteSubtaskById(int id) {
 
         Subtask subtask = subtasks.get(id);
@@ -178,6 +196,7 @@ public class InMemoryTaskManager {
         return ResultOfDeletion.SUCCESS;
     }
 
+    @Override
     public ArrayList<Subtask> getSubtasksOfEpic(int epicId) {
         ArrayList<Subtask> result = new ArrayList<>();
 
