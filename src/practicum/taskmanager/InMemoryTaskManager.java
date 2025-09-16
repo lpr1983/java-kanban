@@ -17,7 +17,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public ArrayList<Task> getTasksList() {
-        return new ArrayList<>(tasks.values());
+        // Возвращаются копии объектов, чтобы пользователь мог изменить данные только через update.
+        ArrayList<Task> result = new ArrayList<>();
+        for (Task task : tasks.values()) {
+            result.add(copyTask(task));
+        }
+        return result;
     }
 
     @Override
@@ -32,20 +37,22 @@ public class InMemoryTaskManager implements TaskManager {
         if (task == null) {
             return null;
         }
-        // Согласно требованию о том, что история просмотров хранит версии на момент вызова
-        // метода получения задачи.
-        Task taskCopy = copyTask(task);
-        historyManager.add(taskCopy);
+        // Согласно требованию, история должна хранить версии.
+        Task taskVersion = copyTask(task);
+        historyManager.add(taskVersion);
 
-        return task;
+        // Пользователю также возвращается копия объекта, чтобы изменения он мог вносить только через update.
+        return copyTask(task);
     }
 
     @Override
     public int createTask(Task newTask) {
 
+        // У пользователя не должен быть объект, хранимый в менеджере, чтобы он мог менять данные задачи только путем вызова update.
+        Task taskToSave = copyTask(newTask);
         int newId = getNextId();
-        newTask.setId(newId);
-        tasks.put(newId, newTask);
+        taskToSave.setId(newId);
+        tasks.put(newId, taskToSave);
 
         return newId;
     }
@@ -57,7 +64,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (!tasks.containsKey(taskId)) {
             return UpdateResult.WRONG_TASK_ID;
         }
-        tasks.put(taskId, task);
+        tasks.put(taskId, copyTask(task));
 
         return UpdateResult.SUCCESS;
     }
@@ -74,8 +81,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getEpicsList() {
-        return new ArrayList<>(epics.values());
+    public ArrayList<Epic> getEpicsList() {
+        ArrayList<Epic> result = new ArrayList<>();
+        for (Epic epic : epics.values()) {
+            result.add(copyEpic(epic));
+        }
+        return result;
     }
 
     @Override
@@ -92,18 +103,19 @@ public class InMemoryTaskManager implements TaskManager {
             return null;
         }
 
-        Task epicCopy = copyEpic(epic);
-        historyManager.add(epicCopy);
+        Epic epicVersion = copyEpic(epic);
+        historyManager.add(epicVersion);
 
-        return epic;
+        return copyEpic(epic);
     }
 
     @Override
     public int createEpic(Epic newEpic) {
 
+        Epic epicToSave = copyEpic(newEpic);
         int newId = getNextId();
-        newEpic.setId(newId);
-        epics.put(newId, newEpic);
+        epicToSave.setId(newId);
+        epics.put(newId, epicToSave);
 
         return newId;
     }
@@ -140,8 +152,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Task> getSubtasksList() {
-        return new ArrayList<>(subtasks.values());
+    public ArrayList<Subtask> getSubtasksList() {
+        ArrayList<Subtask> result = new ArrayList<>();
+        for (Subtask subtask : subtasks.values()) {
+            result.add(copySubtask(subtask));
+        }
+        return result;
     }
 
     @Override
@@ -161,10 +177,10 @@ public class InMemoryTaskManager implements TaskManager {
             return null;
         }
 
-        Subtask copySubtask = copySubtask(subtask);
-        historyManager.add(copySubtask);
+        Subtask subtaskVersion = copySubtask(subtask);
+        historyManager.add(subtaskVersion);
 
-        return subtask;
+        return copySubtask(subtask);
     }
 
     @Override
@@ -175,8 +191,10 @@ public class InMemoryTaskManager implements TaskManager {
             return -1;
         }
         int newId = getNextId();
-        newSubtask.setId(newId);
-        subtasks.put(newId, newSubtask);
+
+        Subtask subtaskToSave = copySubtask(newSubtask);
+        subtaskToSave.setId(newId);
+        subtasks.put(newId, subtaskToSave);
 
         epic.addSubtaskId(newId);
         calculateAndSetEpicStatus(epic);
@@ -201,7 +219,7 @@ public class InMemoryTaskManager implements TaskManager {
             return UpdateResult.WRONG_EPIC_ID;
         }
 
-        subtasks.put(subtaskId, subtask);
+        subtasks.put(subtaskId, copySubtask(subtask));
         calculateAndSetEpicStatus(epic);
 
         return UpdateResult.SUCCESS;
@@ -235,7 +253,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         for (int subtaskId : epic.getListOfSubtasksId()) {
-            Subtask subtask = subtasks.get(subtaskId);
+            Subtask subtask = copySubtask(subtasks.get(subtaskId));
             result.add(subtask);
         }
         return result;

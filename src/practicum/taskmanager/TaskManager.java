@@ -1,7 +1,6 @@
 package practicum.taskmanager;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public interface TaskManager {
     ArrayList<Task> getTasksList();
@@ -16,7 +15,7 @@ public interface TaskManager {
 
     ResultOfDeletion deleteTaskById(int id);
 
-    ArrayList<Task> getEpicsList();
+    ArrayList<Epic> getEpicsList();
 
     void clearEpics();
 
@@ -28,7 +27,7 @@ public interface TaskManager {
 
     ResultOfDeletion deleteEpicById(int id);
 
-    ArrayList<Task> getSubtasksList();
+    ArrayList<Subtask> getSubtasksList();
 
     void clearSubtasks();
 
