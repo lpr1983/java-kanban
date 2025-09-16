@@ -28,7 +28,7 @@ class TaskManagerTest {
 
         boolean result = name1.equals(name2) && description1.equals(description2);
 
-        if (task1 instanceof Task || task1 instanceof Subtask) {
+        if (task1.getClass() == Task.class || task1.getClass() == Subtask.class) {
             result = result && (status1 == status2);
         }
 
@@ -120,7 +120,7 @@ class TaskManagerTest {
         int subtaskId1 = taskManager.createSubtask(subtask1);
 
         Subtask subtask2 = new Subtask(9999, "Subtask 1_2", TaskStatus.DONE , epicId, "Subtask description");
-        int subtaskId2 = taskManager.createSubtask(subtask2);
+        taskManager.createSubtask(subtask2);
 
         Task taskToUpdate = taskManager.getTaskById(taskId);
         taskToUpdate.setStatus(TaskStatus.IN_PROGRESS);
@@ -164,11 +164,11 @@ class TaskManagerTest {
 
         Epic epic = new Epic(999,"Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
-        Epic createdEpic = taskManager.getEpicById(epicId);
+        taskManager.getEpicById(epicId);
 
         Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
         int subtaskId = taskManager.createSubtask(subtask);
-        Subtask createdSubtask = taskManager.getSubtaskById(subtaskId);
+        taskManager.getSubtaskById(subtaskId);
 
         ArrayList<Task> history = taskManager.getHistory();
         assertEquals(3, history.size(), "Неправильное количество задач в истории");
@@ -176,7 +176,7 @@ class TaskManagerTest {
         createdTask.setStatus(TaskStatus.DONE);
         taskManager.updateTask(createdTask);
 
-        TaskStatus statusInHistory = history.get(0).getStatus();
+        TaskStatus statusInHistory = history.getFirst().getStatus();
 
         assertNotEquals(createdTask.getStatus(), statusInHistory,
                 "История должна хранить версию задачи на момент вызова метода getById");
@@ -194,6 +194,46 @@ class TaskManagerTest {
                 assertEquals(10, history.size(), "Неверный размер истории");
             }
         }
+    }
+
+    @Test
+    void deleteAndClearTasks() {
+
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        taskManager.createTask(task);
+
+        Task task2 = new Task("Task 2", TaskStatus.NEW, "Some description");
+        int taskId2 = taskManager.createTask(task2);
+
+        taskManager.deleteTaskById(taskId2);
+        assertEquals(1, taskManager.getTasksList().size(), "Неверное количество в списке");
+
+        taskManager.clearTasks();
+        assertEquals(0, taskManager.getTasksList().size(), "Неверное количество в списке");
+
+        Epic epic = new Epic("Epic 2", "Epic desсription");
+        int epicId = taskManager.createEpic(epic);
+
+        Epic epic2 = new Epic("Epic 2", "Epic desсription");
+        taskManager.createEpic(epic2);
+
+        Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
+        taskManager.createSubtask(subtask);
+
+        Subtask subtask2 = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        int subtaskId2 = taskManager.createSubtask(subtask2);
+
+        taskManager.deleteSubtaskById(subtaskId2);
+        assertEquals(1, taskManager.getSubtasksList().size(), "Неверное количество в списке");
+
+        taskManager.clearSubtasks();
+        assertEquals(0, taskManager.getSubtasksList().size(), "Неверное количество в списке");
+
+        taskManager.deleteEpicById(epicId);
+        assertEquals(1, taskManager.getEpicsList().size(), "Неверное количество в списке");
+
+        taskManager.clearEpics();
+        assertEquals(0, taskManager.getEpicsList().size(), "Неверное количество в списке");
     }
 
 }
