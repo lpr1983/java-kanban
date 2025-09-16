@@ -266,8 +266,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private Task copyTask(Task task) {
-        Task copyTask = new Task(task.getId(), task.getName(), task.getStatus(), task.getDescription());
-        return copyTask;
+        return new Task(task.getId(), task.getName(), task.getStatus(), task.getDescription());
     }
 
     private Epic copyEpic(Epic epic) {
@@ -280,8 +279,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     private Subtask copySubtask(Subtask subtask) {
-        Subtask copySubtask = new Subtask(subtask.getId(), subtask.getName(), subtask.getStatus(),
+        return new Subtask(subtask.getId(), subtask.getName(), subtask.getStatus(),
                 subtask.getEpicId(), subtask.getDescription());
-        return copySubtask;
     }
 }
