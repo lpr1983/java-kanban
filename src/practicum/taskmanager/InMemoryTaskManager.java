@@ -3,7 +3,7 @@ package practicum.taskmanager;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class TaskManager {
+public class InMemoryTaskManager {
     private int numerator = 0;
     private final HashMap<Integer, Task> tasks = new HashMap<>();
     private final HashMap<Integer, Epic> epics = new HashMap<>();
