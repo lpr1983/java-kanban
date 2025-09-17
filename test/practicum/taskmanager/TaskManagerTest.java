@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -170,7 +171,7 @@ class TaskManagerTest {
         int subtaskId = taskManager.createSubtask(subtask);
         taskManager.getSubtaskById(subtaskId);
 
-        ArrayList<Task> history = taskManager.getHistory();
+        List<Task> history = taskManager.getHistory();
         assertEquals(3, history.size(), "Неправильное количество задач в истории");
 
         createdTask.setStatus(TaskStatus.DONE);
