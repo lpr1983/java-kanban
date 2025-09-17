@@ -1,6 +1,7 @@
 package practicum.taskmanager;
 
 import org.junit.jupiter.api.Test;
+import practicum.task.Task;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,5 +1,7 @@
 package practicum.taskmanager;
 
+import practicum.task.Task;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,6 @@
-package practicum.taskmanager;
+package practicum.task;
+
+import practicum.taskmanager.TaskStatus;
 
 import java.util.Objects;
 

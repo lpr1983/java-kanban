@@ -1,9 +1,9 @@
 package practicum;
 
-import practicum.taskmanager.Epic;
+import practicum.task.Epic;
 import practicum.taskmanager.Managers;
-import practicum.taskmanager.Subtask;
-import practicum.taskmanager.Task;
+import practicum.task.Subtask;
+import practicum.task.Task;
 import practicum.taskmanager.TaskManager;
 import practicum.taskmanager.TaskStatus;
 

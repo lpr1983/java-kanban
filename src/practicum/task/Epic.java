@@ -1,9 +1,12 @@
-package practicum.taskmanager;
+package practicum.task;
+
+import practicum.taskmanager.TaskStatus;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Epic extends Task {
-    private final ArrayList<Integer> listOfSubtasksId = new ArrayList<>();
+    private final List<Integer> listOfSubtasksId = new ArrayList<>();
 
     public Epic(int id, String name, String description) {
         super(id, name, TaskStatus.NEW, description);
@@ -13,33 +16,24 @@ public class Epic extends Task {
         super(name, TaskStatus.NEW, description);
     }
 
-    protected ArrayList<Integer> getListOfSubtasksId() {
+    public List<Integer> getListOfSubtasksId() {
         return new ArrayList<>(listOfSubtasksId);
     }
 
-    protected void deleteSubtaskId(int subtaskId) {
+    public void deleteSubtaskId(int subtaskId) {
         listOfSubtasksId.remove(Integer.valueOf(subtaskId));
     }
 
-    protected void  clearSubtasksId() {
+    public void  clearSubtasksId() {
         listOfSubtasksId.clear();
     }
 
-    protected void addSubtaskId(int subtaskId) {
+    public void addSubtaskId(int subtaskId) {
 
         if (listOfSubtasksId.contains(subtaskId)) {
             return;
         }
         listOfSubtasksId.add(subtaskId);
-    }
-
-    @Override
-    public void setStatus(TaskStatus status) {
-        // Не должно быть возможности установить статус Epic вызовом этого метода.
-    }
-
-    protected void setCalculatedStatus(TaskStatus status) {
-        super.setStatus(status);
     }
 
     @Override

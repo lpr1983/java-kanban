@@ -1,4 +1,6 @@
-package practicum.taskmanager;
+package practicum.task;
+
+import practicum.taskmanager.TaskStatus;
 
 public class Subtask extends Task {
     private final int epicId;

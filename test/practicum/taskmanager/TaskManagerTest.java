@@ -2,8 +2,10 @@ package practicum.taskmanager;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import practicum.task.Epic;
+import practicum.task.Subtask;
+import practicum.task.Task;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,8 +42,8 @@ class TaskManagerTest {
         }
 
         if (task1 instanceof Epic) {
-            ArrayList<Integer> subtaskIds1 = ((Epic) task1).getListOfSubtasksId();
-            ArrayList<Integer> subtaskIds2 = ((Epic) task2).getListOfSubtasksId();
+            List<Integer> subtaskIds1 = ((Epic) task1).getListOfSubtasksId();
+            List<Integer> subtaskIds2 = ((Epic) task2).getListOfSubtasksId();
             result = result && Arrays.equals(subtaskIds1.toArray(), subtaskIds2.toArray());
         }
 
@@ -133,6 +135,11 @@ class TaskManagerTest {
                 "Не совпадают поля переданной и сохраненной задачи");
 
         Epic epicToUpdate = taskManager.getEpicById(epicId);
+
+        // Попытка изменить статус эпика в обход менеджера задач
+        epicToUpdate.setStatus(TaskStatus.DONE);
+        epicToUpdate = taskManager.getEpicById(epicId);
+
         assertEquals(TaskStatus.IN_PROGRESS, epicToUpdate.getStatus(),
                 "Не все подзадачи завершены, должен быть статус IN_PROGRESS");
 

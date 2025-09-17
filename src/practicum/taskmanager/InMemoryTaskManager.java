@@ -1,5 +1,9 @@
 package practicum.taskmanager;
 
+import practicum.task.Epic;
+import practicum.task.Subtask;
+import practicum.task.Task;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -283,11 +287,11 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (hasOnlyNewTasks) {
-            epic.setCalculatedStatus(TaskStatus.NEW);
+            epic.setStatus(TaskStatus.NEW);
         } else if (hasIncompletedTasks) {
-            epic.setCalculatedStatus(TaskStatus.IN_PROGRESS);
+            epic.setStatus(TaskStatus.IN_PROGRESS);
         } else {
-            epic.setCalculatedStatus(TaskStatus.DONE);
+            epic.setStatus(TaskStatus.DONE);
         }
     }
 
@@ -297,7 +301,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     private Epic copyEpic(Epic epic) {
         Epic copyEpic = new Epic(epic.getId(), epic.getName(), epic.getDescription());
-        copyEpic.setCalculatedStatus(epic.getStatus());
+        copyEpic.setStatus(epic.getStatus());
         for (Integer id : epic.getListOfSubtasksId()) {
             copyEpic.addSubtaskId(id);
         }
