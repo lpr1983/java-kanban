@@ -28,13 +28,13 @@ public class Main {
         Epic epic = new Epic("Epic 1", "Epic desription");
         int epicId = taskManager.createEpic(epic);
 
-        Subtask subtask = new Subtask("Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask = new Subtask("Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId = taskManager.createSubtask(subtask);
 
-        Subtask subtask2 = new Subtask("Subtask 1_2", TaskStatus.NEW , epicId, "");
+        Subtask subtask2 = new Subtask("Subtask 1_2", TaskStatus.NEW, epicId, "");
         int subtaskId2 = taskManager.createSubtask(subtask2);
 
-        Subtask subtask3 = new Subtask("Subtask 1_3", TaskStatus.NEW , epicId, "");
+        Subtask subtask3 = new Subtask("Subtask 1_3", TaskStatus.NEW, epicId, "");
         int subtaskId3 = taskManager.createSubtask(subtask3);
 
         Epic epic2 = new Epic("Epic 2", "Epic 2 desription");
