@@ -211,6 +211,13 @@ class TaskManagerTest {
         taskManager.deleteSubtaskById(subtaskId);
         assertEquals(2, taskManager.getHistory().size(), "Неверный размер истории после удаления");
 
+        taskManager.clearSubtasks();
+        assertEquals(1, taskManager.getHistory().size(), "Неверный размер истории после удаления");
+
+        Subtask subtask3 = new Subtask("Subtask 1_3", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        int subtaskId3 = taskManager.createSubtask(subtask3);
+        taskManager.getSubtaskById(subtaskId3);
+
         taskManager.deleteEpicById(epicId);
         assertEquals(0, taskManager.getHistory().size(), "Неверный размер истории после удаления");
     }
