@@ -80,9 +80,6 @@ public class InMemoryHistoryManager implements HistoryManager {
         } else {
             nextNode.prev = prevNode;
         }
-
-        node.next = null;
-        node.prev = null;
     }
 
     private class Node {
