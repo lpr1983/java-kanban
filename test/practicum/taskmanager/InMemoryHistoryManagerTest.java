@@ -36,12 +36,18 @@ class InMemoryHistoryManagerTest {
         Task task = new Task(1, "Task1", TaskStatus.NEW, "");
         assertTrue(historyManager.getHistory().contains(task), "Добавленная задача отсутствует.");
 
-        Task unaddedTask = new Task(historySize + 1, "Task1", TaskStatus.NEW, "");
-        assertFalse(historyManager.getHistory().contains(unaddedTask), "Недобаленная задача присутствует.");
-
         historyManager.add(task);
         assertEquals(historySize, historyManager.getHistory().size(),
                 "После добавления имеющейся задачи количество элементов не должно измениться.");
+
+        int amountOfTask1 = 0;
+        for (Task iterTask : historyManager.getHistory()) {
+            if (iterTask.equals(task)) {
+                amountOfTask1++;
+            }
+        }
+
+        assertEquals(1, amountOfTask1, "Задача должна присутствовать в истории только 1 раз.");
 
         assertTrue(historyManager.getHistory().getLast().equals(task),
                 "Добавленная повторно задача должна быть последней.");
