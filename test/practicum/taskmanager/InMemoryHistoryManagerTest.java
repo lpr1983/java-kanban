@@ -26,11 +26,11 @@ class InMemoryHistoryManagerTest {
         assertEquals(historySize, historyManager.getHistory().size(), "Неправильное количество элементов.");
 
         Task firstTask = new Task(1, "Task1", TaskStatus.NEW, "");
-        assertEquals(true, historyManager.getHistory().getFirst().equals(firstTask),
+        assertTrue(historyManager.getHistory().getFirst().equals(firstTask),
                 "Первая задача должна быть первой.");
 
         Task lastTask = new Task(historySize, "Task" + historySize, TaskStatus.NEW, "");
-        assertEquals(true, historyManager.getHistory().getLast().equals(lastTask),
+        assertTrue(historyManager.getHistory().getLast().equals(lastTask),
                 "Последняя задача должна быть последней.");
 
         Task task = new Task(1, "Task1", TaskStatus.NEW, "");
@@ -43,14 +43,14 @@ class InMemoryHistoryManagerTest {
         assertEquals(historySize, historyManager.getHistory().size(),
                 "После добавления имеющейся задачи количество элементов не должно измениться.");
 
-        assertEquals(true, historyManager.getHistory().getLast().equals(task),
+        assertTrue(historyManager.getHistory().getLast().equals(task),
                 "Добавленная повторно задача должна быть последней.");
 
-        assertNotEquals(true, historyManager.getHistory().getFirst().equals(task),
+        assertFalse(historyManager.getHistory().getFirst().equals(task),
                 "При добавлении задача должна удалиться с прежнего места и попасть в конец истории.");
 
         Task task2 = new Task(2, "Task2", TaskStatus.NEW, "");
-        assertEquals(true, historyManager.getHistory().getFirst().equals(task2),
+        assertTrue(historyManager.getHistory().getFirst().equals(task2),
                 "Вторая задача должна стать первой.");
     }
 
@@ -72,7 +72,7 @@ class InMemoryHistoryManagerTest {
                 "Удаленная задача осталась в истории.");
 
         Task task2 = new Task(2, "Task2", TaskStatus.NEW, "");
-        assertEquals(true, historyManager.getHistory().getFirst().equals(task2), "Вторая задача не стала первой.");
+        assertTrue(historyManager.getHistory().getFirst().equals(task2), "Вторая задача не стала первой.");
     }
 
 }
