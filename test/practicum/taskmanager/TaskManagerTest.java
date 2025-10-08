@@ -84,9 +84,11 @@ class TaskManagerTest {
                 "Поля переданной и сохраненной задач не совпададают");
         assertNull(taskManager.getSubtaskById(999), "Id должен переопределиться при создании");
 
+        Epic addedEpic = taskManager.getEpicById(epicId);
+        assertTrue(addedEpic.getListOfSubtasksId().contains(subtaskId), "Эпик не содержит id созденной подзадачи.");
+
         // Состояние epic изменилось при добавлении подзадачи
-        TaskStatus newEpicStatus = taskManager.getEpicById(epicId).getStatus();
-        assertEquals(TaskStatus.IN_PROGRESS, newEpicStatus, "Статус должен быть IN_PROGRESS");
+        assertEquals(TaskStatus.IN_PROGRESS, addedEpic.getStatus(), "Статус должен быть IN_PROGRESS");
 
         // Задача, оставшаяся у пользователя, не может изменить данные задачи в менеджере
         createdTask.setStatus(TaskStatus.DONE);
@@ -170,6 +172,10 @@ class TaskManagerTest {
         int taskId = taskManager.createTask(task);
         Task createdTask = taskManager.getTaskById(taskId);
 
+        Task task2 = new Task(999,"Task 2", TaskStatus.NEW, "Some description");
+        int taskId2 = taskManager.createTask(task2);
+        taskManager.getTaskById(taskId2);
+
         Epic epic = new Epic(999,"Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
         taskManager.getEpicById(epicId);
@@ -178,30 +184,35 @@ class TaskManagerTest {
         int subtaskId = taskManager.createSubtask(subtask);
         taskManager.getSubtaskById(subtaskId);
 
-        List<Task> history = taskManager.getHistory();
-        assertEquals(3, history.size(), "Неправильное количество задач в истории");
+        Subtask subtask2 = new Subtask(999, "Subtask 1_2", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        int subtaskId2 = taskManager.createSubtask(subtask2);
+        taskManager.getSubtaskById(subtaskId2);
+
+        assertEquals(5, taskManager.getHistory().size(), "Неправильное количество задач в истории");
 
         createdTask.setStatus(TaskStatus.DONE);
         taskManager.updateTask(createdTask);
 
-        TaskStatus statusInHistory = history.getFirst().getStatus();
+        TaskStatus statusInHistory = taskManager.getHistory().getFirst().getStatus();
 
         assertNotEquals(createdTask.getStatus(), statusInHistory,
                 "История должна хранить версию задачи на момент вызова метода getById");
 
-        for (int i = history.size() + 1; i <12 ; i++) {
-            Task newTask = new Task("Task " + i, TaskStatus.NEW, "");
-            int newTaskId = taskManager.createTask(newTask);
-            taskManager.getTaskById(newTaskId);
-            history = taskManager.getHistory();
-            if (i == 9) {
-                assertEquals(9, history.size(), "Неверный размер истории");
-            } else if (i == 10) {
-                assertEquals(10, history.size(), "Неверный размер истории");
-            } else if (i == 11) {
-                assertEquals(10, history.size(), "Неверный размер истории");
-            }
-        }
+        Task taskById = taskManager.getTaskById(taskId);
+        assertEquals(5, taskManager.getHistory().size(), "Неправильное количество задач в истории");
+        assertEquals(taskById, taskManager.getHistory().getLast(), "Последний просмотренный должен быть последним");
+
+        taskManager.deleteTaskById(taskId);
+        assertEquals(4, taskManager.getHistory().size(), "Неверный размер истории после удаления");
+
+        taskManager.clearTasks();
+        assertEquals(3, taskManager.getHistory().size(), "Неверный размер истории после удаления");
+
+        taskManager.deleteSubtaskById(subtaskId);
+        assertEquals(2, taskManager.getHistory().size(), "Неверный размер истории после удаления");
+
+        taskManager.deleteEpicById(epicId);
+        assertEquals(0, taskManager.getHistory().size(), "Неверный размер истории после удаления");
     }
 
     @Test
@@ -223,10 +234,10 @@ class TaskManagerTest {
         int epicId = taskManager.createEpic(epic);
 
         Epic epic2 = new Epic("Epic 2", "Epic desсription");
-        taskManager.createEpic(epic2);
+        int epicId2 = taskManager.createEpic(epic2);
 
         Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
-        taskManager.createSubtask(subtask);
+        int subtaskId1 = taskManager.createSubtask(subtask);
 
         Subtask subtask2 = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
         int subtaskId2 = taskManager.createSubtask(subtask2);
@@ -234,8 +245,17 @@ class TaskManagerTest {
         taskManager.deleteSubtaskById(subtaskId2);
         assertEquals(1, taskManager.getSubtasksList().size(), "Неверное количество в списке");
 
+        epic = taskManager.getEpicById(epicId);
+        assertTrue(epic.getListOfSubtasksId().contains(subtaskId1), "В эпике нет id добавленной подзадачи.");
+        assertFalse(epic.getListOfSubtasksId().contains(subtaskId2), "Эпик содержит id удаленной подзадачи.");
+
         taskManager.clearSubtasks();
-        assertEquals(0, taskManager.getSubtasksList().size(), "Неверное количество в списке");
+        assertEquals(0, taskManager.getSubtasksList().size(), "Неверное количество подзадач в списке.");
+
+        epic = taskManager.getEpicById(epicId);
+        epic2 = taskManager.getEpicById(epicId2);
+        assertTrue(epic.getListOfSubtasksId().isEmpty() && epic2.getListOfSubtasksId().isEmpty(),
+                "Список подзадач эпиков не пустой после очистки подзадач.");
 
         taskManager.deleteEpicById(epicId);
         assertEquals(1, taskManager.getEpicsList().size(), "Неверное количество в списке");
@@ -243,5 +263,4 @@ class TaskManagerTest {
         taskManager.clearEpics();
         assertEquals(0, taskManager.getEpicsList().size(), "Неверное количество в списке");
     }
-
 }
