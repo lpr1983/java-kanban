@@ -290,8 +290,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     private void calculateAndSetEpicStatus(Epic epic) {
 
-       boolean hasIncompletedTasks = false;
-       boolean hasOnlyNewTasks = true;
+        boolean hasIncompletedTasks = false;
+        boolean hasOnlyNewTasks = true;
 
         for (Integer i : epic.getListOfSubtasksId()) {
             Subtask currentSubtask = subtasks.get(i);
