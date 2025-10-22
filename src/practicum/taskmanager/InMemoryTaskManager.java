@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
-    private int numerator = 0;
+    protected int numerator = 0;
     private final Map<Integer, Task> tasks = new HashMap<>();
     private final Map<Integer, Epic> epics = new HashMap<>();
     private final Map<Integer, Subtask> subtasks = new HashMap<>();
@@ -328,5 +328,17 @@ public class InMemoryTaskManager implements TaskManager {
     private Subtask copySubtask(Subtask subtask) {
         return new Subtask(subtask.getId(), subtask.getName(), subtask.getStatus(),
                 subtask.getEpicId(), subtask.getDescription());
+    }
+
+    protected void putTaskWithoutAnyActions(Task task) {
+        tasks.put(task.getId(), task);
+    }
+
+    protected void putEpicWithoutAnyActions(Epic epic) {
+        epics.put(epic.getId(), epic);
+    }
+
+    protected void putSubtaskWithoutAnyActions(Subtask subtask) {
+        subtasks.put(subtask.getId(), subtask);
     }
 }

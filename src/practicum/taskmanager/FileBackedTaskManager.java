@@ -13,7 +13,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -35,39 +34,38 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         FileBackedTaskManager taskManager = new FileBackedTaskManager(fileName);
 
-        List<Task> tasksBufer = new ArrayList<>();
-        List<Epic> epicsBufer = new ArrayList<>();
-        List<Subtask> subtasksBufer = new ArrayList<>();
-
         try (FileReader fileReader = new FileReader(fileName, StandardCharsets.UTF_8)) {
 
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String currentString = bufferedReader.readLine();
 
+            int maxId = 0;
+
             while (bufferedReader.ready()) {
                 currentString = bufferedReader.readLine();
 
                 ResultOfSerialization rs = CsvSerializer.fromCsvString(currentString);
+
+                Task task = rs.getTask();
+                TaskType taskType = rs.getTaskType();
+
+                List<TaskType> supportedTypes = List.of(TaskType.TASK, TaskType.EPIC, TaskType.SUBTASK);
+                if (!supportedTypes.contains(taskType)) {
+                    continue;
+                }
+
+                maxId = Integer.max(task.getId(), maxId);
+
                 if (rs.getTaskType() == TaskType.TASK) {
-                    tasksBufer.add(rs.getTask());
+                    taskManager.putTaskWithoutAnyActions(task);
                 } else if (rs.getTaskType() == TaskType.EPIC) {
-                    epicsBufer.add((Epic) rs.getTask());
+                    taskManager.putEpicWithoutAnyActions((Epic) task);
                 } else if (rs.getTaskType() == TaskType.SUBTASK) {
-                    subtasksBufer.add((Subtask) rs.getTask());
+                    taskManager.putSubtaskWithoutAnyActions((Subtask) task);
                 }
             }
-        }
 
-        for (Task task : tasksBufer) {
-            taskManager.loadTask(task);
-        }
-
-        for (Epic epic : epicsBufer) {
-            taskManager.loadEpic(epic);
-        }
-
-        for (Subtask subtask : subtasksBufer) {
-            taskManager.loadSubtask(subtask);
+            taskManager.numerator = maxId + 1;
         }
 
         return taskManager;
@@ -176,17 +174,5 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         } catch (IOException e) {
             throw new ManagerSaveException(e);
         }
-    }
-
-    private void loadTask(Task task) {
-        super.createTask(task);
-    }
-
-    private void loadEpic(Epic epic) {
-        super.createEpic(epic);
-    }
-
-    private void loadSubtask(Subtask subtask) {
-        super.createSubtask(subtask);
     }
 }

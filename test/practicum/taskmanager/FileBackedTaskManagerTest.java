@@ -7,11 +7,14 @@ import practicum.task.Epic;
 import practicum.task.Subtask;
 import practicum.task.Task;
 import practicum.task.TaskType;
+import practicum.task.serializer.CsvSerializer;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 class FileBackedTaskManagerTest {
@@ -208,11 +211,30 @@ class FileBackedTaskManagerTest {
 
     @Test
     void loadFromFile() throws IOException {
-        Task task = new Task("task1", TaskStatus.NEW, "task1 description");
-        int taskId = taskManager.createTask(task);
-        task = taskManager.getTaskById(taskId);
+
+        Writer writer = new FileWriter(fileName, StandardCharsets.UTF_8);
+
+        Task task = new Task(10, "test task", TaskStatus.NEW, "task descriprion");
+        Epic epic = new Epic(20, "test epic", TaskStatus.IN_PROGRESS, "epic descriprion");
+        Subtask subtask = new Subtask(22, "test subtask", TaskStatus.DONE, epic.getId(), "epic descriprion");
+
+        writer.write("id,type,name,status,description,epic" + '\n');
+        writer.write(CsvSerializer.toCsvString(task, TaskType.TASK) + '\n');
+        writer.write(CsvSerializer.toCsvString(epic, TaskType.EPIC) + '\n');
+        writer.write(CsvSerializer.toCsvString(subtask, TaskType.SUBTASK));
+        writer.close();
 
         taskManager = FileBackedTaskManager.loadFromFile(fileName);
-        checkRecord(task, TaskType.TASK);
+        Task loadedTask = taskManager.getTaskById(task.getId());
+        Epic loadedEpic = taskManager.getEpicById(epic.getId());
+        Subtask loadedSubtask = taskManager.getSubtaskById(subtask.getId());
+
+        boolean compareTaskResult = TaskManagerTest.compareTasksByFields(task, loadedTask);
+        boolean compareEpicResult = TaskManagerTest.compareTasksByFields(epic, loadedEpic);
+        boolean compareSubtaskResult = TaskManagerTest.compareTasksByFields(subtask, loadedSubtask);
+
+        Assertions.assertTrue(compareTaskResult, "Не совпадают сохраненная и восстановленная Task");
+        Assertions.assertTrue(compareEpicResult, "Не совпадают сохраненная и восстановленная Epic");
+        Assertions.assertTrue(compareSubtaskResult, "Не совпадают сохраненная и восстановленная Subtask");
     }
 }

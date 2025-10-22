@@ -20,7 +20,12 @@ class TaskManagerTest {
         taskManager = Managers.getDefault();
     }
 
-    private <T extends Task> boolean compareTasksByFields(T task1, T task2) {
+    public static <T extends Task> boolean compareTasksByFields(T task1, T task2) {
+
+        if (task1 == null || task2 == null) {
+            return false;
+        }
+
         String name1 = task1.getName();
         String description1 = task1.getDescription();
         TaskStatus status1 = task1.getStatus();
@@ -53,7 +58,7 @@ class TaskManagerTest {
     @Test
     void createTasks() {
 
-        Task task = new Task(999,"Task 1", TaskStatus.NEW, "Some description");
+        Task task = new Task(999, "Task 1", TaskStatus.NEW, "Some description");
         int taskId = taskManager.createTask(task);
         Task createdTask = taskManager.getTaskById(taskId);
 
@@ -65,7 +70,7 @@ class TaskManagerTest {
         // По переданному в самой задаче Id ничего не должно находиться
         assertNull(taskManager.getTaskById(999), "Id должен переопределиться при создании");
 
-        Epic epic = new Epic(999,"Epic 1", "Epic desсription");
+        Epic epic = new Epic(999, "Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
 
         Epic createdEpic = taskManager.getEpicById(epicId);
@@ -75,7 +80,7 @@ class TaskManagerTest {
                 "Поля переданной и сохраненной задач не совпададают");
         assertNull(taskManager.getEpicById(999), "Id должен переопределиться при создании");
 
-        Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId = taskManager.createSubtask(subtask);
 
         Subtask createdSubtask = taskManager.getSubtaskById(subtaskId);
@@ -107,8 +112,8 @@ class TaskManagerTest {
                 "Пользователь не должен иметь возможность изменить данные без update");
 
         assertEquals(1, taskManager.getTasksList().size(), "Неверное количество задач");
-        assertEquals(1, taskManager.getEpicsList().size(),  "Неверное количество эпиков");
-        assertEquals(1, taskManager.getSubtasksList().size(),  "Неверное количество подзадач");
+        assertEquals(1, taskManager.getEpicsList().size(), "Неверное количество эпиков");
+        assertEquals(1, taskManager.getSubtasksList().size(), "Неверное количество подзадач");
         assertEquals(1, taskManager.getSubtasksOfEpic(epicId).size(), "Неверное количество подзадач у эпика");
     }
 
@@ -121,10 +126,10 @@ class TaskManagerTest {
         Epic epic = new Epic("Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
 
-        Subtask subtask1 = new Subtask(9999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask1 = new Subtask(9999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId1 = taskManager.createSubtask(subtask1);
 
-        Subtask subtask2 = new Subtask(9999, "Subtask 1_2", TaskStatus.DONE , epicId, "Subtask description");
+        Subtask subtask2 = new Subtask(9999, "Subtask 1_2", TaskStatus.DONE, epicId, "Subtask description");
         taskManager.createSubtask(subtask2);
 
         Task taskToUpdate = taskManager.getTaskById(taskId);
@@ -168,23 +173,23 @@ class TaskManagerTest {
     @Test
     void historyStoring() {
 
-        Task task = new Task(999,"Task 1", TaskStatus.NEW, "Some description");
+        Task task = new Task(999, "Task 1", TaskStatus.NEW, "Some description");
         int taskId = taskManager.createTask(task);
         Task createdTask = taskManager.getTaskById(taskId);
 
-        Task task2 = new Task(999,"Task 2", TaskStatus.NEW, "Some description");
+        Task task2 = new Task(999, "Task 2", TaskStatus.NEW, "Some description");
         int taskId2 = taskManager.createTask(task2);
         taskManager.getTaskById(taskId2);
 
-        Epic epic = new Epic(999,"Epic 1", "Epic desсription");
+        Epic epic = new Epic(999, "Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
         taskManager.getEpicById(epicId);
 
-        Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId = taskManager.createSubtask(subtask);
         taskManager.getSubtaskById(subtaskId);
 
-        Subtask subtask2 = new Subtask(999, "Subtask 1_2", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask2 = new Subtask(999, "Subtask 1_2", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId2 = taskManager.createSubtask(subtask2);
         taskManager.getSubtaskById(subtaskId2);
 
@@ -214,7 +219,7 @@ class TaskManagerTest {
         taskManager.clearSubtasks();
         assertEquals(1, taskManager.getHistory().size(), "Неверный размер истории после удаления");
 
-        Subtask subtask3 = new Subtask("Subtask 1_3", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask3 = new Subtask("Subtask 1_3", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId3 = taskManager.createSubtask(subtask3);
         taskManager.getSubtaskById(subtaskId3);
 
@@ -246,7 +251,7 @@ class TaskManagerTest {
         Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId1 = taskManager.createSubtask(subtask);
 
-        Subtask subtask2 = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS , epicId, "Subtask description");
+        Subtask subtask2 = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId2 = taskManager.createSubtask(subtask2);
 
         taskManager.deleteSubtaskById(subtaskId2);
