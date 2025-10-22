@@ -58,7 +58,7 @@ public class CsvSerializer {
 
         Task task = switch (taskType) {
             case TASK -> new Task(id, name, status, description);
-            case EPIC -> new Epic(id, name, description);
+            case EPIC -> new Epic(id, name, status, description);
             case SUBTASK -> new Subtask(id, name, status, epicId, description);
             default -> throw new IllegalArgumentException("Not supported type");
         };
