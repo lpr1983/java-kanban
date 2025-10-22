@@ -13,7 +13,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private String fileName;
@@ -40,6 +43,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             String currentString = bufferedReader.readLine();
 
             int maxId = 0;
+            // Для восстановления внутреннего хранилища epic.listOfSubtasksId
+            HashMap<Integer, List<Integer>> subtasksIdOfEpic = new HashMap<>();
 
             while (bufferedReader.ready()) {
                 currentString = bufferedReader.readLine();
@@ -61,11 +66,31 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 } else if (rs.getTaskType() == TaskType.EPIC) {
                     taskManager.putEpicWithoutAnyActions((Epic) task);
                 } else if (rs.getTaskType() == TaskType.SUBTASK) {
-                    taskManager.putSubtaskWithoutAnyActions((Subtask) task);
+                    Subtask subtask = (Subtask) task;
+                    taskManager.putSubtaskWithoutAnyActions(subtask);
+
+                    int epicId = subtask.getEpicId();
+                    List<Integer> listOfSubtasksId = subtasksIdOfEpic.get(epicId);
+                    if (listOfSubtasksId == null) {
+                        listOfSubtasksId = new ArrayList<>();
+                    }
+                    listOfSubtasksId.add(subtask.getId());
+                    subtasksIdOfEpic.put(epicId, listOfSubtasksId);
                 }
             }
 
             taskManager.numerator = maxId + 1;
+            for (Map.Entry<Integer, List<Integer>> entry : subtasksIdOfEpic.entrySet()) {
+
+                int epicId = entry.getKey();
+                Epic loadedEpic = taskManager.getEpicById(epicId);
+
+                List<Integer> listOfSubtasksId = entry.getValue();
+                for (Integer i : listOfSubtasksId) {
+                    loadedEpic.addSubtaskId(i);
+                }
+                taskManager.putEpicWithoutAnyActions(loadedEpic);
+            }
         }
 
         return taskManager;

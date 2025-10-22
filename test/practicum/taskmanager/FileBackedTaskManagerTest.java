@@ -172,7 +172,7 @@ class FileBackedTaskManagerTest {
     void createSubtask() throws IOException {
         Epic epic = new Epic("epic", "epic description");
         int epicId = taskManager.createEpic(epic);
-        epic = taskManager.getEpicById(epicId);
+        taskManager.getEpicById(epicId);
 
         Subtask task = new Subtask("subtask", TaskStatus.IN_PROGRESS, epicId, "st description");
         int taskId = taskManager.createSubtask(task);
@@ -185,7 +185,7 @@ class FileBackedTaskManagerTest {
     void updateSubtask() throws IOException {
         Epic epic = new Epic("epic", "epic description");
         int epicId = taskManager.createEpic(epic);
-        epic = taskManager.getEpicById(epicId);
+        taskManager.getEpicById(epicId);
 
         Subtask task = new Subtask("subtask", TaskStatus.IN_PROGRESS, epicId, "st description");
         int taskId = taskManager.createSubtask(task);
@@ -217,6 +217,7 @@ class FileBackedTaskManagerTest {
         Task task = new Task(10, "test task", TaskStatus.NEW, "task descriprion");
         Epic epic = new Epic(20, "test epic", TaskStatus.IN_PROGRESS, "epic descriprion");
         Subtask subtask = new Subtask(22, "test subtask", TaskStatus.DONE, epic.getId(), "epic descriprion");
+        epic.addSubtaskId(22);
 
         writer.write("id,type,name,status,description,epic" + '\n');
         writer.write(CsvSerializer.toCsvString(task, TaskType.TASK) + '\n');
