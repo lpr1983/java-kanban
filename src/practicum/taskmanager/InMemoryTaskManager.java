@@ -344,7 +344,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected void setSubtasksIdForEpics(HashMap<Integer, List<Integer>> subtasksIdOfEpics) {
 
-        for (Map.Entry <Integer, List<Integer>> entry: subtasksIdOfEpics.entrySet()) {
+        for (Map.Entry<Integer, List<Integer>> entry : subtasksIdOfEpics.entrySet()) {
 
             int epicId = entry.getKey();
             Epic epic = epics.get(epicId);
