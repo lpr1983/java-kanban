@@ -341,4 +341,19 @@ public class InMemoryTaskManager implements TaskManager {
     protected void putSubtaskWithoutAnyActions(Subtask subtask) {
         subtasks.put(subtask.getId(), subtask);
     }
+
+    protected void setSubtasksIdForEpics(HashMap<Integer, List<Integer>> subtasksIdOfEpics) {
+
+        for (Map.Entry <Integer, List<Integer>> entry: subtasksIdOfEpics.entrySet()) {
+
+            int epicId = entry.getKey();
+            Epic epic = epics.get(epicId);
+
+            List<Integer> listOfSubtasksId = entry.getValue();
+
+            for (Integer subtaskId : listOfSubtasksId) {
+                epic.addSubtaskId(subtaskId);
+            }
+        }
+    }
 }
