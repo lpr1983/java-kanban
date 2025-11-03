@@ -4,6 +4,8 @@ import practicum.task.Epic;
 import practicum.task.Subtask;
 import practicum.task.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -188,6 +190,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : epics.values()) {
             epic.clearSubtasksId();
             calculateAndSetEpicStatus(epic);
+            calculateAndSetEpicTimes(epic);
         }
     }
 
@@ -220,6 +223,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         epic.addSubtaskId(newId);
         calculateAndSetEpicStatus(epic);
+        calculateAndSetEpicTimes(epic);
 
         return newId;
     }
@@ -243,6 +247,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         subtasks.put(subtaskId, copySubtask(subtask));
         calculateAndSetEpicStatus(epic);
+        calculateAndSetEpicTimes(epic);
 
         return UpdateResult.SUCCESS;
     }
@@ -262,6 +267,7 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.remove(id);
 
         calculateAndSetEpicStatus(epic);
+        calculateAndSetEpicTimes(epic);
 
         return ResultOfDeletion.SUCCESS;
     }
@@ -312,22 +318,80 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    private void calculateAndSetEpicTimes(Epic epic) {
+
+        Duration epicDuration = Duration.ofDays(0);
+        LocalDateTime epicStartTime = null;
+        LocalDateTime epicEndTime = null;
+
+        for (int subtaskId : epic.getListOfSubtasksId()) {
+            Subtask subtask = subtasks.get(subtaskId);
+
+            Duration subtaskDuration = subtask.getDuration();
+            LocalDateTime subtaskStartTime = subtask.getStartTime();
+            LocalDateTime subtaskEndTime = subtask.getEndTime();
+
+            if (subtaskDuration == null || subtaskStartTime == null || subtaskEndTime == null) {
+                continue;
+            }
+
+            epicDuration = epicDuration.plus(subtask.getDuration());
+
+            if (epicStartTime == null) {
+                epicStartTime = subtask.getStartTime();
+            } else if (subtask.getStartTime().isBefore(epicStartTime)) {
+                epicStartTime = subtask.getStartTime();
+            }
+
+            if (epicEndTime == null) {
+                epicEndTime = subtask.getEndTime();
+            } else if (subtask.getEndTime().isAfter(epicEndTime)) {
+                epicEndTime = subtask.getEndTime();
+            }
+
+        }
+
+        epic.setEndTime(epicEndTime);
+        epic.setStartTime(epicStartTime);
+        epic.setDuration(epicDuration);
+
+    }
+
+
     private Task copyTask(Task task) {
-        return new Task(task.getId(), task.getName(), task.getStatus(), task.getDescription());
+        return new Task(task.getId(),
+                task.getName(),
+                task.getStatus(),
+                task.getDescription(),
+                task.getStartTime(),
+                task.getDuration());
     }
 
     private Epic copyEpic(Epic epic) {
-        Epic copyEpic = new Epic(epic.getId(), epic.getName(), epic.getDescription());
-        copyEpic.setStatus(epic.getStatus());
+
+        Epic copyEpic = new Epic(epic.getId(),
+                epic.getName(),
+                epic.getStatus(),
+                epic.getDescription(),
+                epic.getStartTime(),
+                epic.getDuration(),
+                epic.getEndTime());
+
         for (Integer id : epic.getListOfSubtasksId()) {
             copyEpic.addSubtaskId(id);
         }
+
         return copyEpic;
     }
 
     private Subtask copySubtask(Subtask subtask) {
-        return new Subtask(subtask.getId(), subtask.getName(), subtask.getStatus(),
-                subtask.getEpicId(), subtask.getDescription());
+        return new Subtask(subtask.getId(),
+                subtask.getName(),
+                subtask.getStatus(),
+                subtask.getEpicId(),
+                subtask.getDescription(),
+                subtask.getStartTime(),
+                subtask.getDuration());
     }
 
     protected void putTaskWithoutAnyActions(Task task) {

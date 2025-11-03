@@ -2,6 +2,9 @@ package practicum.task;
 
 import practicum.taskmanager.TaskStatus;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class Subtask extends Task {
     private final int epicId;
 
@@ -12,6 +15,11 @@ public class Subtask extends Task {
 
     public Subtask(int id, String name, TaskStatus status, int epicId, String description) {
         super(id, name, status, description);
+        this.epicId = epicId;
+    }
+
+    public Subtask(int id, String name, TaskStatus status, int epicId, String description, LocalDateTime startTime, Duration duration) {
+        super(id, name, status, description, startTime, duration);
         this.epicId = epicId;
     }
 

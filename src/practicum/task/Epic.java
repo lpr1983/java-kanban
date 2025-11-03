@@ -2,11 +2,23 @@ package practicum.task;
 
 import practicum.taskmanager.TaskStatus;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
     private final List<Integer> listOfSubtasksId = new ArrayList<>();
+    protected LocalDateTime endTime;
+
+    @Override
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
 
     public Epic(int id, String name, String description) {
         super(id, name, TaskStatus.NEW, description);
@@ -18,6 +30,11 @@ public class Epic extends Task {
 
     public Epic(int id, String name, TaskStatus status, String description) {
         super(id, name, status, description);
+    }
+
+    public Epic(int id, String name, TaskStatus status, String description, LocalDateTime startTime, Duration duration, LocalDateTime endTime) {
+        super(id, name, status, description, startTime, duration);
+        this.endTime = endTime;
     }
 
     public List<Integer> getListOfSubtasksId() {

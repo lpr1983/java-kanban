@@ -6,6 +6,8 @@ import practicum.task.Epic;
 import practicum.task.Subtask;
 import practicum.task.Task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -274,5 +276,30 @@ class TaskManagerTest {
 
         taskManager.clearEpics();
         assertEquals(0, taskManager.getEpicsList().size(), "Неверное количество в списке");
+    }
+
+    @Test
+    void testEpicTimes() {
+
+        Epic epic = new Epic("test epic", "");
+        int epicId = taskManager.createEpic(epic);
+
+        LocalDateTime minStartTime = LocalDateTime.of(2025, 1, 1, 0, 0);
+        Duration duration1 = Duration.ofDays(31);
+        Duration duration2 = Duration.ofDays(1);
+
+        Subtask subtask1 = new Subtask("test subtask1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTimeAndDuration(minStartTime, duration1);
+        taskManager.createSubtask(subtask1);
+
+        Subtask subtask2 = new Subtask("test subtask2", TaskStatus.IN_PROGRESS, epicId, "");
+        subtask2.setStartTimeAndDuration(minStartTime.plusMonths(1), duration2);
+        taskManager.createSubtask(subtask2);
+
+        epic = taskManager.getEpicById(epicId);
+
+        assertEquals(minStartTime, epic.getStartTime(), "Неправильное время начала у epic");
+        assertEquals(subtask2.getEndTime(), epic.getEndTime(), "Неправильное время окончания у epic");
+        assertEquals(duration1.plus(duration2),epic.getDuration(),  "Неправильная продолжительность у epic");
     }
 }
