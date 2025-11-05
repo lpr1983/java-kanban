@@ -20,8 +20,8 @@ class EpicTest {
     void getEndTime() {
 
         Epic epic = new Epic(1, "epic", "");
-        epic.setStartTimeAndDuration(LocalDateTime.of(2025, 1, 1, 0, 0),
-                Duration.ofDays(1));
+        epic.setStartTime(LocalDateTime.of(2025, 1, 1, 0, 0));
+        epic.setDuration(Duration.ofDays(1));
 
         epic.setEndTime(LocalDateTime.of(2025, 1, 1, 0, 0));
 

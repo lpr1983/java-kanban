@@ -168,7 +168,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (Writer writer = new FileWriter(fileName, StandardCharsets.UTF_8)) {
 
-            String csvHeader = "id,type,name,status,description,epic";
+            String csvHeader = "id,type,name,status,description,epic,startTime,duration,endTime";
             writer.write(csvHeader);
 
             for (Task task : getTasksList()) {

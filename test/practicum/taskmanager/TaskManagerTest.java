@@ -31,15 +31,45 @@ class TaskManagerTest {
         String name1 = task1.getName();
         String description1 = task1.getDescription();
         TaskStatus status1 = task1.getStatus();
+        LocalDateTime startTime1 = task1.getStartTime();
+        Duration duration1 = task1.getDuration();
+        LocalDateTime endTime1 = task1.getEndTime();
 
         String name2 = task2.getName();
         String description2 = task2.getDescription();
         TaskStatus status2 = task2.getStatus();
+        LocalDateTime startTime2 = task2.getStartTime();
+        Duration duration2 = task2.getDuration();
+        LocalDateTime endTime2 = task2.getEndTime();
 
         boolean result = name1.equals(name2) && description1.equals(description2);
 
         if (task1.getClass() == Task.class || task1.getClass() == Subtask.class) {
             result = result && (status1 == status2);
+        }
+
+        if (startTime1 == null && startTime2 != null) {
+            result = false;
+        } else if (startTime2 == null && startTime1 != null) {
+            result = false;
+        } else if (startTime1 != null && startTime2 != null){
+            result = result && startTime1.equals(startTime2);
+        }
+
+        if (endTime1 == null && endTime2 != null) {
+            result = false;
+        } else if (endTime2 == null && endTime1 != null) {
+            result = false;
+        } else if (endTime1 != null && endTime2 != null) {
+            result = result && endTime1.equals(endTime2);
+        }
+
+        if (duration1 == null && duration2 != null) {
+            result = false;
+        } else if (duration2 == null && duration1 != null) {
+            result = false;
+        } else if (duration1 != null && duration2 != null) {
+            result = result && duration1.equals(duration2);
         }
 
         if (task1 instanceof Subtask) {
@@ -289,11 +319,13 @@ class TaskManagerTest {
         Duration duration2 = Duration.ofDays(1);
 
         Subtask subtask1 = new Subtask("test subtask1", TaskStatus.NEW, epicId, "");
-        subtask1.setStartTimeAndDuration(minStartTime, duration1);
+        subtask1.setStartTime(minStartTime);
+        subtask1.setDuration(duration1);
         taskManager.createSubtask(subtask1);
 
         Subtask subtask2 = new Subtask("test subtask2", TaskStatus.IN_PROGRESS, epicId, "");
-        subtask2.setStartTimeAndDuration(minStartTime.plusMonths(1), duration2);
+        subtask2.setStartTime(minStartTime.plusMonths(1));
+        subtask2.setDuration(duration2);
         taskManager.createSubtask(subtask2);
 
         epic = taskManager.getEpicById(epicId);

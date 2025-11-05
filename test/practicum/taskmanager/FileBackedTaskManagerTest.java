@@ -1,4 +1,4 @@
-package practicum.taskmanager;
+ package practicum.taskmanager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +16,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
-class FileBackedTaskManagerTest {
+ class FileBackedTaskManagerTest {
     static TaskManager taskManager;
     static String fileName;
 
@@ -34,7 +36,8 @@ class FileBackedTaskManagerTest {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String header = bufferedReader.readLine();
 
-            Assertions.assertEquals("id,type,name,status,description,epic", header, "Некорретный заголовок");
+            Assertions.assertEquals("id,type,name,status,description,epic,startTime,duration,endTime",
+                    header, "Некорретный заголовок");
 
             Assertions.assertFalse(bufferedReader.ready(), "Файл не пустой");
         }
@@ -47,15 +50,15 @@ class FileBackedTaskManagerTest {
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String header = bufferedReader.readLine();
 
-            Assertions.assertEquals("id,type,name,status,description,epic", header, "Некорретный заголовок");
+            Assertions.assertEquals("id,type,name,status,description,epic,startTime,duration,endTime",
+                    header, "Некорретный заголовок");
 
             while (bufferedReader.ready()) {
                 storedRecord = bufferedReader.readLine();
             }
 
-            String formatString = "%d,%s,%s,%s,%s,";
+            String formatString = "%d,%s,%s,%s,%s,%s,";
             if (taskType == TaskType.SUBTASK) {
-                formatString += "%s";
                 expectedString = String.format(formatString,
                         task.getId(),
                         taskType,
@@ -70,8 +73,25 @@ class FileBackedTaskManagerTest {
                         taskType,
                         task.getName(),
                         task.getStatus(),
-                        task.getDescription()
+                        task.getDescription(),
+                        ""
                 );
+            }
+
+            if (task.getStartTime() != null) {
+                expectedString += String.format("%s,", task.getStartTime());
+            } else {
+                expectedString += ",";
+            }
+
+            if (task.getDuration() != null) {
+                expectedString += String.format("%d,", task.getDuration().toMinutes());
+            } else {
+                expectedString += ",";
+            }
+
+            if (task.getEndTime() != null) {
+                expectedString += String.format("%s", task.getEndTime());
             }
         }
 
@@ -215,11 +235,20 @@ class FileBackedTaskManagerTest {
         Writer writer = new FileWriter(fileName, StandardCharsets.UTF_8);
 
         Task task = new Task(10, "test task", TaskStatus.NEW, "task descriprion");
+        task.setStartTime(LocalDateTime.now());
+        task.setDuration(Duration.ofDays(1));
+
         Epic epic = new Epic(20, "test epic", TaskStatus.IN_PROGRESS, "epic descriprion");
+        epic.setStartTime(LocalDateTime.now());
+        epic.setDuration(Duration.ofDays(1));
+        epic.setEndTime(epic.getStartTime().plusDays(1));
+
         Subtask subtask = new Subtask(22, "test subtask", TaskStatus.DONE, epic.getId(), "epic descriprion");
+        epic.setStartTime(LocalDateTime.now());
+        epic.setDuration(Duration.ofDays(1));
         epic.addSubtaskId(22);
 
-        writer.write("id,type,name,status,description,epic" + '\n');
+        writer.write("id,type,name,status,description,epic,startTime,duration,endTime" + '\n');
         writer.write(CsvSerializer.toCsvString(task, TaskType.TASK) + '\n');
         writer.write(CsvSerializer.toCsvString(epic, TaskType.EPIC) + '\n');
         writer.write(CsvSerializer.toCsvString(subtask, TaskType.SUBTASK));

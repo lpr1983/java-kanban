@@ -36,11 +36,6 @@ public class Task {
         this.duration = duration;
     }
 
-    public void setStartTimeAndDuration(LocalDateTime startTime, Duration duration) {
-        this.startTime = startTime;
-        this.duration = duration;
-    }
-
     public Duration getDuration() {
         return duration;
     }

@@ -24,7 +24,8 @@ class TaskTest {
         Duration duration = Duration.ofDays(1);
 
         Task taskWithDuration = new Task(1, "name", TaskStatus.NEW, "");
-        taskWithDuration.setStartTimeAndDuration(startTime, duration);
+        taskWithDuration.setStartTime(startTime);
+        taskWithDuration.setDuration(duration);
 
         LocalDateTime endTime = taskWithDuration.getEndTime();
         LocalDateTime expectedTime = LocalDateTime.of(2025, 1, 2, 0, 0);
