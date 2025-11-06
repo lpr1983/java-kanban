@@ -1,5 +1,6 @@
 package practicum.taskmanager;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import practicum.task.Epic;
@@ -52,7 +53,7 @@ class TaskManagerTest {
             result = false;
         } else if (startTime2 == null && startTime1 != null) {
             result = false;
-        } else if (startTime1 != null && startTime2 != null){
+        } else if (startTime1 != null && startTime2 != null) {
             result = result && startTime1.equals(startTime2);
         }
 
@@ -332,7 +333,7 @@ class TaskManagerTest {
 
         assertEquals(minStartTime, epic.getStartTime(), "Неправильное время начала у epic");
         assertEquals(subtask2.getEndTime(), epic.getEndTime(), "Неправильное время окончания у epic");
-        assertEquals(duration1.plus(duration2),epic.getDuration(),  "Неправильная продолжительность у epic");
+        assertEquals(duration1.plus(duration2), epic.getDuration(), "Неправильная продолжительность у epic");
     }
 
     @Test
@@ -529,6 +530,87 @@ class TaskManagerTest {
         assertTrue(compareTasksByFields(subtask1, sortedTasks.get(0)), "Неправильный порядок задач");
         assertTrue(compareTasksByFields(task, sortedTasks.get(1)), "Неправильный порядок задач");
         assertTrue(compareTasksByFields(task2, sortedTasks.get(2)), "Неправильный порядок задач");
+    }
+
+    @Test
+    void createTaskAndSubtaskWithOverlaping() {
+
+        LocalDateTime testTime = LocalDateTime.now();
+
+        // Первая задача
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        task.setStartTime(testTime);
+        task.setDuration(Duration.ofDays(1));
+        taskManager.createTask(task);
+
+        // Непересекающаяся задача
+        Task task2 = new Task("Task 2", TaskStatus.NEW, "Some description");
+        task2.setStartTime(testTime.plusDays(1));
+        task2.setDuration(Duration.ofDays(1));
+        taskManager.createTask(task2);
+
+        // Пересекающаяся задача
+        Task task3 = new Task("Task 3", TaskStatus.NEW, "Some description");
+        task3.setStartTime(testTime.plusDays(1));
+        task3.setDuration(Duration.ofDays(1));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.createTask(task3));
+
+        Epic epic = new Epic("Epic", "");
+        int epicId = taskManager.createEpic(epic);
+
+        // Непересекующаяся подзадача
+        Subtask subtask = new Subtask("subtask", TaskStatus.NEW, epicId, "");
+        subtask.setStartTime(testTime.plusDays(2));
+        subtask.setDuration(Duration.ofDays(1));
+        taskManager.createSubtask(subtask);
+
+        // Пересекающаяся подзадача
+        Subtask subtask2 = new Subtask("subtask2", TaskStatus.NEW, epicId, "");
+        subtask2.setStartTime(testTime.plusHours(12));
+        subtask2.setDuration(Duration.ofDays(1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.createSubtask(subtask2));
+    }
+
+    @Test
+    void updateTaskWithOverlaping() {
+
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        task.setStartTime(testTime);
+        task.setDuration(Duration.ofDays(1));
+        taskManager.createTask(task);
+
+        Task task2 = new Task("Task 2", TaskStatus.NEW, "Some description");
+        task2.setStartTime(testTime.plusDays(1));
+        task2.setDuration(Duration.ofDays(1));
+        int taskId2 = taskManager.createTask(task2);
+
+        // Обновление без пересечения
+        task2 = taskManager.getTaskById(taskId2);
+        taskManager.updateTask(task2);
+
+        // Обновление с пересечением
+        Task taskToCheck = taskManager.getTaskById(taskId2);
+        taskToCheck.setStartTime(testTime);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.updateTask(taskToCheck));
+
+        Epic epic = new Epic("Epic", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask = new Subtask("subtask", TaskStatus.NEW, epicId, "");
+        subtask.setStartTime(testTime.plusDays(2));
+        subtask.setDuration(Duration.ofDays(1));
+        int subtaskId = taskManager.createSubtask(subtask);
+
+        // Обновление без пересечения
+        Subtask subtaskToCheck = taskManager.getSubtaskById(subtaskId);
+        taskManager.updateSubtask(subtaskToCheck);
+
+        // Обновление с пересечением
+        subtaskToCheck.setStartTime(testTime);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.updateSubtask(subtaskToCheck));
     }
 
 }

@@ -47,7 +47,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (task.getClass() == Task.class) {
                 result.add(copyTask(task));
             } else if (task.getClass() == Subtask.class) {
-                result.add(copySubtask((Subtask)task));
+                result.add(copySubtask((Subtask) task));
             }
         }
 
@@ -91,6 +91,10 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public int createTask(Task newTask) {
 
+        if (taskOverlapsWithOtherTask(newTask)) {
+            throw new IllegalArgumentException("Task overlaps with other task");
+        }
+
         // У пользователя не должен быть объект, хранимый в менеджере, чтобы он мог менять данные задачи только путем вызова update.
         Task taskToSave = copyTask(newTask);
         int newId = getNextId();
@@ -110,6 +114,10 @@ public class InMemoryTaskManager implements TaskManager {
         int taskId = task.getId();
         if (!tasks.containsKey(taskId)) {
             return UpdateResult.WRONG_TASK_ID;
+        }
+
+        if (taskOverlapsWithOtherTask(task)) {
+            throw new IllegalArgumentException("Task overlaps with other task");
         }
 
         Task storedTask = tasks.get(taskId);
@@ -263,6 +271,11 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic == null) {
             return -1;
         }
+
+        if (taskOverlapsWithOtherTask(newSubtask)) {
+            throw new IllegalArgumentException("Task overlaps with other task");
+        }
+
         int newId = getNextId();
 
         Subtask subtaskToSave = copySubtask(newSubtask);
@@ -295,6 +308,10 @@ public class InMemoryTaskManager implements TaskManager {
 
         if (epic == null || storedSubtask.getEpicId() != epicId) {
             return UpdateResult.WRONG_EPIC_ID;
+        }
+
+        if (taskOverlapsWithOtherTask(subtask)) {
+            throw new IllegalArgumentException("Task overlaps with other task");
         }
 
         Subtask subtaskToSave = copySubtask(subtask);
@@ -499,4 +516,31 @@ public class InMemoryTaskManager implements TaskManager {
             }
         }
     }
+
+    protected boolean taskOverlapsWithOtherTask(Task taskToCheck) {
+
+        return prioritizedTasks.stream().anyMatch(
+                task -> !task.equals(taskToCheck) && tasksOverlap(task, taskToCheck)
+        );
+
+    }
+
+    public static boolean tasksOverlap(Task task1, Task task2) {
+
+        LocalDateTime startTime1 = task1.getStartTime();
+        LocalDateTime endTime1 = task1.getEndTime();
+
+        LocalDateTime startTime2 = task2.getStartTime();
+        LocalDateTime endTime2 = task2.getEndTime();
+
+        if (startTime1 == null || endTime1 == null ||
+                startTime2 == null || endTime2 == null) {
+
+            return false;
+        }
+
+        return startTime2.isBefore(endTime1)
+                && startTime1.isBefore(endTime2);
+    }
+
 }
