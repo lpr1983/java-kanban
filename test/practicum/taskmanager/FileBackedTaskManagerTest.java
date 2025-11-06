@@ -18,6 +18,9 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
  class FileBackedTaskManagerTest {
     static TaskManager taskManager;
@@ -244,8 +247,8 @@ import java.time.LocalDateTime;
         epic.setEndTime(epic.getStartTime().plusDays(1));
 
         Subtask subtask = new Subtask(22, "test subtask", TaskStatus.DONE, epic.getId(), "epic descriprion");
-        epic.setStartTime(LocalDateTime.now());
-        epic.setDuration(Duration.ofDays(1));
+        subtask.setStartTime(LocalDateTime.now().minusDays(1));
+        subtask.setDuration(Duration.ofDays(1));
         epic.addSubtaskId(22);
 
         writer.write("id,type,name,status,description,epic,startTime,duration,endTime" + '\n');
@@ -266,5 +269,11 @@ import java.time.LocalDateTime;
         Assertions.assertTrue(compareTaskResult, "Не совпадают сохраненная и восстановленная Task");
         Assertions.assertTrue(compareEpicResult, "Не совпадают сохраненная и восстановленная Epic");
         Assertions.assertTrue(compareSubtaskResult, "Не совпадают сохраненная и восстановленная Subtask");
+
+        List<Task> sortedList = taskManager.getPrioritizedTasks();
+        Assertions.assertEquals(2, sortedList.size(), "Неправильный размер getPrioritizedTasks");
+        assertTrue(TaskManagerTest.compareTasksByFields(loadedSubtask, sortedList.get(0)), "Неправильный порядок задач");
+        assertTrue(TaskManagerTest.compareTasksByFields(loadedTask, sortedList.get(1)), "Неправильный порядок задач");
     }
+
 }

@@ -334,4 +334,201 @@ class TaskManagerTest {
         assertEquals(subtask2.getEndTime(), epic.getEndTime(), "Неправильное время окончания у epic");
         assertEquals(duration1.plus(duration2),epic.getDuration(),  "Неправильная продолжительность у epic");
     }
+
+    @Test
+    void getPrioritizedTasksCreateTask() {
+
+        LocalDateTime testTime = LocalDateTime.now();
+        // Создание задачи
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        task.setStartTime(testTime);
+        taskManager.createTask(task);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+        assertTrue(compareTasksByFields(task, sortedTasks.getFirst()), "Добавленная задача не совпадает с задачей в списке getPrioritizedTasks");
+    }
+
+    @Test
+    void getPrioritizedTasksUpdateTask() {
+
+        LocalDateTime testTime = LocalDateTime.now();
+        // Создание задачи
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        task.setStartTime(testTime);
+        int taskId = taskManager.createTask(task);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        // Изменение задачи
+        task = taskManager.getTaskById(taskId);
+        task.setStartTime(testTime.plusDays(1));
+        taskManager.updateTask(task);
+
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+        assertTrue(compareTasksByFields(task, sortedTasks.getFirst()), "Добавленная задача не совпадает с задачей в списке getPrioritizedTasks");
+    }
+
+    @Test
+    void getPrioritizedTasksDeleteTask() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        task.setStartTime(testTime);
+        int taskId = taskManager.createTask(task);
+
+        taskManager.deleteTaskById(taskId);
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, sortedTasks.size(), "getPrioritizedTasks должен быть пустой");
+    }
+
+    @Test
+    void getPrioritizedTasksClearTasks() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Task task = new Task("Task 1", TaskStatus.NEW, "Some description");
+        task.setStartTime(testTime);
+        taskManager.createTask(task);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        // Очистка задач
+        taskManager.clearTasks();
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, sortedTasks.size(), "getPrioritizedTasks должен быть пустой");
+    }
+
+    @Test
+    void getPrioritizedTasksCreateSubtask() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        // Создание подзадачи
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        taskManager.createSubtask(subtask1);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+        assertTrue(compareTasksByFields(subtask1, sortedTasks.getFirst()), "Добавленная подзадача не совпадает с подзадачей" +
+                " в списке getPrioritizedTasks");
+    }
+
+    @Test
+    void getPrioritizedTasksUpdateSubtask() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        int subtaskId = taskManager.createSubtask(subtask1);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        subtask1 = taskManager.getSubtaskById(subtaskId);
+        subtask1.setStartTime(testTime.plusDays(1));
+        subtask1.setDuration(Duration.ofDays(7));
+
+        // Обновление подзадачи
+        taskManager.updateSubtask(subtask1);
+        sortedTasks = taskManager.getPrioritizedTasks();
+
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+        assertTrue(compareTasksByFields(subtask1, sortedTasks.getFirst()), "Добавленная подзадача не совпадает с подзадачей" +
+                " в списке getPrioritizedTasks");
+    }
+
+    @Test
+    void getPrioritizedTasksDeleteSubtask() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        int subtaskId = taskManager.createSubtask(subtask1);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        taskManager.deleteSubtaskById(subtaskId);
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, sortedTasks.size(), "getPrioritizedTasks должен быть пустой");
+    }
+
+    @Test
+    void getPrioritizedTasksClearSubtask() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        taskManager.createSubtask(subtask1);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        taskManager.clearSubtasks();
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, sortedTasks.size(), "getPrioritizedTasks должен быть пустой");
+    }
+
+    @Test
+    void getPrioritizedTasksSortsOrder() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        int subtaskId = taskManager.createSubtask(subtask1);
+
+        Task task = new Task("task1", TaskStatus.NEW, "");
+        task.setStartTime(testTime.plusDays(1));
+        int taskId = taskManager.createTask(task);
+
+        Task task2 = new Task("task2", TaskStatus.NEW, "");
+        task2.setStartTime(testTime.minusDays(1));
+        int task2Id = taskManager.createTask(task2);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(3, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        subtask1 = taskManager.getSubtaskById(subtaskId);
+        task = taskManager.getTaskById(taskId);
+        task2 = taskManager.getTaskById(task2Id);
+
+        assertTrue(compareTasksByFields(task2, sortedTasks.get(0)), "Неправильный порядок задач");
+        assertTrue(compareTasksByFields(subtask1, sortedTasks.get(1)), "Неправильный порядок задач");
+        assertTrue(compareTasksByFields(task, sortedTasks.get(2)), "Неправильный порядок задач");
+
+        subtask1.setStartTime(subtask1.getStartTime().minusDays(3));
+        taskManager.updateSubtask(subtask1);
+
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertTrue(compareTasksByFields(subtask1, sortedTasks.get(0)), "Неправильный порядок задач");
+        assertTrue(compareTasksByFields(task2, sortedTasks.get(1)), "Неправильный порядок задач");
+        assertTrue(compareTasksByFields(task, sortedTasks.get(2)), "Неправильный порядок задач");
+
+        task2.setStartTime(task2.getStartTime().plusDays(10));
+        taskManager.updateTask(task2);
+
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertTrue(compareTasksByFields(subtask1, sortedTasks.get(0)), "Неправильный порядок задач");
+        assertTrue(compareTasksByFields(task, sortedTasks.get(1)), "Неправильный порядок задач");
+        assertTrue(compareTasksByFields(task2, sortedTasks.get(2)), "Неправильный порядок задач");
+    }
+
 }
