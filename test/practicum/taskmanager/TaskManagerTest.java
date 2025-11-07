@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +35,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Task task2 = new Task("tast2", TaskStatus.NEW, "");
         int taskId2 = taskManager.createTask(task2);
 
-        List<Task> requireList = List.of(taskManager.getTaskById(taskId1), taskManager.getTaskById(taskId2));
+        List<Task> requireList = List.of(getTaskById(taskId1), getTaskById(taskId2));
         List<Task> tasksList = taskManager.getTasksList();
 
         boolean arraysAreEqual = Arrays.equals(requireList.toArray(), tasksList.toArray());
@@ -63,13 +64,13 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Task task2 = new Task(999, "task1", TaskStatus.NEW, "");
         taskManager.createTask(task2);
 
-        Task storedTask = taskManager.getTaskById(taskId1);
+        Task storedTask = getTaskById(taskId1);
 
         assertTrue(compareTasksByFields(task1, storedTask),
                 "По id не вернулась нужная задача.");
 
         task1.setStatus(TaskStatus.IN_PROGRESS);
-        assertNotEquals(task1.getStatus(), taskManager.getTaskById(taskId1).getStatus(),
+        assertNotEquals(task1.getStatus(), getTaskById(taskId1).getStatus(),
                 "Не должен возвращаться хранимый объект");
 
         boolean historyIsAdded = Arrays.equals(taskManager.getHistory().toArray(), List.of(storedTask).toArray());
@@ -82,7 +83,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Task task1 = new Task(999, "task1", TaskStatus.NEW, "");
         int taskId1 = taskManager.createTask(task1);
 
-        Task storedTask = taskManager.getTaskById(taskId1);
+        Task storedTask = getTaskById(taskId1);
         assertTrue(compareTasksByFields(task1, storedTask), "Состав полей сохраненной задачи неправильный");
         assertNotEquals(task1.getId(), storedTask.getId(), "Менеджер должен присвоить новый номер");
     }
@@ -96,11 +97,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Task taskToUpdate = new Task(taskId1, "task1 updated", TaskStatus.IN_PROGRESS, "upd");
         taskManager.updateTask(taskToUpdate);
 
-        Task updatedTask = taskManager.getTaskById(taskId1);
+        Task updatedTask = getTaskById(taskId1);
         assertTrue(compareTasksByFields(taskToUpdate, updatedTask), "Состав полей задачи не обновился");
 
         updatedTask.setStatus(TaskStatus.DONE);
-        assertNotEquals(updatedTask.getStatus(), taskManager.getTaskById(taskId1).getStatus(),
+        assertNotEquals(updatedTask.getStatus(), getTaskById(taskId1).getStatus(),
                 "update не должен сохранять объект пользователя");
     }
 
@@ -115,7 +116,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.deleteTaskById(taskId1);
         boolean arraysAreEqual = Arrays.equals(taskManager.getTasksList().toArray(),
-                List.of(taskManager.getTaskById(taskId2)).toArray());
+                List.of(getTaskById(taskId2)).toArray());
 
         assertTrue(arraysAreEqual, "Неправильный состав списка задач после удаления");
     }
@@ -129,7 +130,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic2 = new Epic("epic2", "");
         int epicId2 = taskManager.createEpic(epic2);
 
-        List<Task> requireList = List.of(taskManager.getEpicById(epicId1), taskManager.getEpicById(epicId2));
+        List<Task> requireList = List.of(getEpicById(epicId1), getEpicById(epicId2));
         List<Epic> tasksList = taskManager.getEpicsList();
 
         Assertions.assertArrayEquals(requireList.toArray(), tasksList.toArray(), "Неправильный состав списка.");
@@ -161,13 +162,13 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic2 = new Epic(999, "epic2", "");
         taskManager.createEpic(epic2);
 
-        Epic storedTask = taskManager.getEpicById(epicId1);
+        Epic storedTask = getEpicById(epicId1);
 
         assertTrue(compareTasksByFields(epic1, storedTask),
                 "По id не вернулась нужная задача.");
 
         epic1.setStatus(TaskStatus.IN_PROGRESS);
-        assertNotEquals(epic1.getStatus(), taskManager.getEpicById(epicId1).getStatus(),
+        assertNotEquals(epic1.getStatus(), getEpicById(epicId1).getStatus(),
                 "Не должен возвращаться хранимый объект");
 
         boolean historyIsAdded = Arrays.equals(taskManager.getHistory().toArray(), List.of(storedTask).toArray());
@@ -180,14 +181,14 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic(999, "epic", "descr");
         int epicId = taskManager.createEpic(epic);
 
-        Epic storedEpic = taskManager.getEpicById(epicId);
+        Epic storedEpic = getEpicById(epicId);
         assertTrue(compareTasksByFields(epic, storedEpic), "Состав полей сохраненной задачи неправильный");
         assertNotEquals(epic.getId(), storedEpic.getId(), "Менеджер должен присвоить новый номер");
 
         Epic epic2 = new Epic(999, "epic2", "descr");
         epic2.setStatus(TaskStatus.IN_PROGRESS);
         int epicId2 = taskManager.createEpic(epic);
-        assertEquals(TaskStatus.NEW, taskManager.getEpicById(epicId2).getStatus(), "Статус нового epic должен быть NEW");
+        assertEquals(TaskStatus.NEW, getEpicById(epicId2).getStatus(), "Статус нового epic должен быть NEW");
     }
 
     @Test
@@ -199,11 +200,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epicToUpdate = new Epic(epicId, "epic updated", "upd");
         taskManager.updateEpic(epicToUpdate);
 
-        Epic updatedEpic = taskManager.getEpicById(epicId);
+        Epic updatedEpic = getEpicById(epicId);
         assertTrue(compareTasksByFields(epicToUpdate, updatedEpic), "Состав полей задачи не обновился");
 
         updatedEpic.setStatus(TaskStatus.DONE);
-        assertNotEquals(updatedEpic.getStatus(), taskManager.getEpicById(epicId).getStatus(),
+        assertNotEquals(updatedEpic.getStatus(), getEpicById(epicId).getStatus(),
                 "update не должен сохранять объект пользователя");
     }
 
@@ -219,7 +220,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.deleteEpicById(epicId1);
 
         boolean arraysAreEqual = Arrays.equals(taskManager.getEpicsList().toArray(),
-                List.of(taskManager.getEpicById(epicId2)).toArray());
+                List.of(getEpicById(epicId2)).toArray());
 
         assertTrue(arraysAreEqual, "Неправильный состав списка задач после удаления");
     }
@@ -236,8 +237,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask2 = new Subtask("subtask2", TaskStatus.IN_PROGRESS, epicId, "descr2");
         int subtaskId2 = taskManager.createSubtask(subtask2);
 
-        List<Task> requireList = List.of(taskManager.getSubtaskById(subtaskId1),
-                taskManager.getSubtaskById(subtaskId2));
+        List<Task> requireList = List.of(getSubtaskById(subtaskId1),
+                getSubtaskById(subtaskId2));
 
         List<Subtask> tasksList = taskManager.getSubtasksList();
 
@@ -272,12 +273,12 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask2 = new Subtask(999, "subtask2", TaskStatus.IN_PROGRESS, epicId, "descr2");
         taskManager.createSubtask(subtask2);
 
-        Subtask storedTask = taskManager.getSubtaskById(subtaskId1);
+        Subtask storedTask = getSubtaskById(subtaskId1);
         assertTrue(compareTasksByFields(subtask1, storedTask),
                 "По id не вернулась нужная задача.");
 
         subtask1.setStatus(TaskStatus.IN_PROGRESS);
-        assertNotEquals(subtask1.getStatus(), taskManager.getSubtaskById(subtaskId1).getStatus(),
+        assertNotEquals(subtask1.getStatus(), getSubtaskById(subtaskId1).getStatus(),
                 "Не должен возвращаться хранимый объект");
 
         boolean historyIsAdded = Arrays.equals(taskManager.getHistory().toArray(), List.of(storedTask).toArray());
@@ -293,7 +294,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask1 = new Subtask("subtask1", TaskStatus.NEW, epicId, "descr1");
         int subtaskId = taskManager.createSubtask(subtask1);
 
-        Task storedTask = taskManager.getSubtaskById(subtaskId);
+        Task storedTask = getSubtaskById(subtaskId);
         assertTrue(compareTasksByFields(subtask1, storedTask), "Состав полей сохраненной задачи неправильный");
         assertNotEquals(subtask1.getId(), storedTask.getId(), "Менеджер должен присвоить новый номер");
 
@@ -314,11 +315,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask taskToUpdate = new Subtask(subtaskId, "subtask1 updated", TaskStatus.IN_PROGRESS, epicId, "upd");
         taskManager.updateSubtask(taskToUpdate);
 
-        Task updatedTask = taskManager.getSubtaskById(subtaskId);
+        Task updatedTask = getSubtaskById(subtaskId);
         assertTrue(compareTasksByFields(taskToUpdate, updatedTask), "Состав полей задачи не обновился");
 
         updatedTask.setStatus(TaskStatus.DONE);
-        assertNotEquals(updatedTask.getStatus(), taskManager.getSubtaskById(subtaskId).getStatus(),
+        assertNotEquals(updatedTask.getStatus(), getSubtaskById(subtaskId).getStatus(),
                 "update не должен сохранять объект пользователя");
     }
 
@@ -336,7 +337,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         taskManager.deleteSubtaskById(subtaskId);
         boolean arraysAreEqual = Arrays.equals(taskManager.getSubtasksList().toArray(),
-                List.of(taskManager.getSubtaskById(subtaskId2)).toArray());
+                List.of(getSubtaskById(subtaskId2)).toArray());
 
         assertTrue(arraysAreEqual, "Неправильный состав списка задач после удаления");
     }
@@ -353,8 +354,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask2 = new Subtask("subtask2", TaskStatus.NEW, epicId, "descr2");
         int subtaskId2 = taskManager.createSubtask(subtask2);
 
-        List<Subtask> requiredList = List.of(taskManager.getSubtaskById(subtaskId),
-                taskManager.getSubtaskById(subtaskId2));
+        List<Subtask> requiredList = List.of(getSubtaskById(subtaskId),
+                getSubtaskById(subtaskId2));
 
         List<Subtask> taskList = taskManager.getSubtasksOfEpic(epicId);
 
@@ -367,23 +368,23 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         Task task = new Task(999, "Task 1", TaskStatus.NEW, "Some description");
         int taskId = taskManager.createTask(task);
-        Task createdTask = taskManager.getTaskById(taskId);
+        Task createdTask = getTaskById(taskId);
 
         Task task2 = new Task(999, "Task 2", TaskStatus.NEW, "Some description");
         int taskId2 = taskManager.createTask(task2);
-        taskManager.getTaskById(taskId2);
+        getTaskById(taskId2);
 
         Epic epic = new Epic(999, "Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
-        taskManager.getEpicById(epicId);
+        getEpicById(epicId);
 
         Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId = taskManager.createSubtask(subtask);
-        taskManager.getSubtaskById(subtaskId);
+        getSubtaskById(subtaskId);
 
         Subtask subtask2 = new Subtask(999, "Subtask 1_2", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId2 = taskManager.createSubtask(subtask2);
-        taskManager.getSubtaskById(subtaskId2);
+        getSubtaskById(subtaskId2);
 
         assertEquals(5, taskManager.getHistory().size(), "Неправильное количество задач в истории");
 
@@ -395,7 +396,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertNotEquals(createdTask.getStatus(), statusInHistory,
                 "История должна хранить версию задачи на момент вызова метода getById");
 
-        Task taskById = taskManager.getTaskById(taskId);
+        Task taskById = getTaskById(taskId);
         assertEquals(5, taskManager.getHistory().size(), "Неправильное количество задач в истории");
         assertEquals(taskById, taskManager.getHistory().getLast(), "Последний просмотренный должен быть последним");
 
@@ -413,7 +414,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         Subtask subtask3 = new Subtask("Subtask 1_3", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId3 = taskManager.createSubtask(subtask3);
-        taskManager.getSubtaskById(subtaskId3);
+        getSubtaskById(subtaskId3);
 
         taskManager.deleteEpicById(epicId);
         assertEquals(0, taskManager.getHistory().size(), "Неверный размер истории после удаления");
@@ -447,7 +448,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
 
         // Изменение задачи
-        task = taskManager.getTaskById(taskId);
+        task = getTaskById(taskId);
         task.setStartTime(testTime.plusDays(1));
         taskManager.updateTask(task);
 
@@ -518,7 +519,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<Task> sortedTasks = taskManager.getPrioritizedTasks();
         assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
 
-        subtask1 = taskManager.getSubtaskById(subtaskId);
+        subtask1 = getSubtaskById(subtaskId);
         subtask1.setStartTime(testTime.plusDays(1));
         subtask1.setDuration(Duration.ofDays(7));
 
@@ -629,9 +630,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
         List<Task> sortedTasks = taskManager.getPrioritizedTasks();
         assertEquals(3, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
 
-        subtask1 = taskManager.getSubtaskById(subtaskId);
-        task = taskManager.getTaskById(taskId);
-        task2 = taskManager.getTaskById(task2Id);
+        subtask1 = getSubtaskById(subtaskId);
+        task = getTaskById(taskId);
+        task2 = getTaskById(task2Id);
 
         assertTrue(compareTasksByFields(task2, sortedTasks.get(0)), "Неправильный порядок задач");
         assertTrue(compareTasksByFields(subtask1, sortedTasks.get(1)), "Неправильный порядок задач");
@@ -710,11 +711,11 @@ abstract class TaskManagerTest<T extends TaskManager> {
         int taskId2 = taskManager.createTask(task2);
 
         // Обновление без пересечения
-        task2 = taskManager.getTaskById(taskId2);
+        task2 = getTaskById(taskId2);
         taskManager.updateTask(task2);
 
         // Обновление с пересечением
-        Task taskToCheck = taskManager.getTaskById(taskId2);
+        Task taskToCheck = getTaskById(taskId2);
         taskToCheck.setStartTime(testTime);
         Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.updateTask(taskToCheck));
 
@@ -727,7 +728,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         int subtaskId = taskManager.createSubtask(subtask);
 
         // Обновление без пересечения
-        Subtask subtaskToCheck = taskManager.getSubtaskById(subtaskId);
+        Subtask subtaskToCheck = getSubtaskById(subtaskId);
         taskManager.updateSubtask(subtaskToCheck);
 
         // Обновление с пересечением
@@ -741,41 +742,41 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic("epic", "");
         int epicId = taskManager.createEpic(epic);
 
-        assertEquals(TaskStatus.NEW, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.NEW, getEpicById(epicId).getStatus());
 
         Subtask subtask1 = new Subtask("subtask1", TaskStatus.NEW, epicId, "");
         int subtaskId1 = taskManager.createSubtask(subtask1);
 
-        assertEquals(TaskStatus.NEW, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.NEW, getEpicById(epicId).getStatus());
 
         Subtask subtask2 = new Subtask("subtask2", TaskStatus.NEW, epicId, "");
         int subtaskId2 = taskManager.createSubtask(subtask2);
 
-        assertEquals(TaskStatus.NEW, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.NEW, getEpicById(epicId).getStatus());
 
-        subtask1 = taskManager.getSubtaskById(subtaskId1);
+        subtask1 = getSubtaskById(subtaskId1);
         subtask1.setStatus(TaskStatus.IN_PROGRESS);
         taskManager.updateSubtask(subtask1);
 
-        assertEquals(TaskStatus.IN_PROGRESS, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.IN_PROGRESS, getEpicById(epicId).getStatus());
 
-        subtask2 = taskManager.getSubtaskById(subtaskId2);
+        subtask2 = getSubtaskById(subtaskId2);
         subtask2.setStatus(TaskStatus.IN_PROGRESS);
         taskManager.updateSubtask(subtask2);
 
-        assertEquals(TaskStatus.IN_PROGRESS, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.IN_PROGRESS, getEpicById(epicId).getStatus());
 
-        subtask1 = taskManager.getSubtaskById(subtaskId1);
+        subtask1 = getSubtaskById(subtaskId1);
         subtask1.setStatus(TaskStatus.DONE);
         taskManager.updateSubtask(subtask1);
 
-        assertEquals(TaskStatus.IN_PROGRESS, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.IN_PROGRESS, getEpicById(epicId).getStatus());
 
-        subtask2 = taskManager.getSubtaskById(subtaskId2);
+        subtask2 = getSubtaskById(subtaskId2);
         subtask2.setStatus(TaskStatus.DONE);
         taskManager.updateSubtask(subtask2);
 
-        assertEquals(TaskStatus.DONE, taskManager.getEpicById(epicId).getStatus());
+        assertEquals(TaskStatus.DONE, getEpicById(epicId).getStatus());
     }
 
     @Test
@@ -798,7 +799,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         subtask2.setDuration(duration2);
         taskManager.createSubtask(subtask2);
 
-        epic = taskManager.getEpicById(epicId);
+        epic = getEpicById(epicId);
 
         assertEquals(minStartTime, epic.getStartTime(), "Неправильное время начала у epic");
         assertEquals(subtask2.getEndTime(), epic.getEndTime(), "Неправильное время окончания у epic");
@@ -869,7 +870,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         Task task = new Task(999, "Task 1", TaskStatus.NEW, "Some description");
         int taskId = taskManager.createTask(task);
-        Task createdTask = taskManager.getTaskById(taskId);
+        Task createdTask = getTaskById(taskId);
 
         // Задача создалась, нашлась по возвращенному id
         assertNotNull(createdTask, "Не найдена задача по возвращенному Id");
@@ -877,28 +878,28 @@ abstract class TaskManagerTest<T extends TaskManager> {
         assertTrue(compareTasksByFields(task, createdTask),
                 "Поля переданной и сохраненной задач не совпададают");
         // По переданному в самой задаче Id ничего не должно находиться
-        assertNull(taskManager.getTaskById(999), "Id должен переопределиться при создании");
+        assertTrue(taskManager.getTaskById(999).isEmpty(), "Id должен переопределиться при создании");
 
         Epic epic = new Epic(999, "Epic 1", "Epic desсription");
         int epicId = taskManager.createEpic(epic);
 
-        Epic createdEpic = taskManager.getEpicById(epicId);
+        Epic createdEpic = getEpicById(epicId);
 
         assertNotNull(createdEpic, "Не найдена задача по Id");
         assertTrue(compareTasksByFields(epic, createdEpic),
                 "Поля переданной и сохраненной задач не совпададают");
-        assertNull(taskManager.getEpicById(999), "Id должен переопределиться при создании");
+        assertTrue(taskManager.getEpicById(999).isEmpty(), "Id должен переопределиться при создании");
 
         Subtask subtask = new Subtask(999, "Subtask 1_1", TaskStatus.IN_PROGRESS, epicId, "Subtask description");
         int subtaskId = taskManager.createSubtask(subtask);
 
-        Subtask createdSubtask = taskManager.getSubtaskById(subtaskId);
+        Subtask createdSubtask = getSubtaskById(subtaskId);
         assertNotNull(createdSubtask, "Не найдена задача по Id");
         assertTrue(compareTasksByFields(subtask, createdSubtask),
                 "Поля переданной и сохраненной задач не совпададают");
-        assertNull(taskManager.getSubtaskById(999), "Id должен переопределиться при создании");
+        assertTrue(taskManager.getSubtaskById(999).isEmpty(), "Id должен переопределиться при создании");
 
-        Epic addedEpic = taskManager.getEpicById(epicId);
+        Epic addedEpic = getEpicById(epicId);
         assertTrue(addedEpic.getListOfSubtasksId().contains(subtaskId), "Эпик не содержит id созденной подзадачи.");
 
         // Состояние epic изменилось при добавлении подзадачи
@@ -906,17 +907,17 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         // Задача, оставшаяся у пользователя, не может изменить данные задачи в менеджере
         createdTask.setStatus(TaskStatus.DONE);
-        TaskStatus storedStatus = taskManager.getTaskById(taskId).getStatus();
+        TaskStatus storedStatus = getTaskById(taskId).getStatus();
         assertNotEquals(createdTask.getStatus(), storedStatus,
                 "Пользователь не должен иметь возможность изменить данные без update");
 
         createdEpic.setDescription("Новое описание");
-        String storedDescription = taskManager.getEpicById(epicId).getDescription();
+        String storedDescription = getEpicById(epicId).getDescription();
         assertNotEquals(createdEpic.getDescription(), storedDescription,
                 "Пользователь не должен иметь возможность изменить данные без update");
 
         createdSubtask.setDescription("Новое описание");
-        storedDescription = taskManager.getSubtaskById(subtaskId).getDescription();
+        storedDescription = getSubtaskById(subtaskId).getDescription();
         assertNotEquals(createdSubtask.getDescription(), storedDescription,
                 "Пользователь не должен иметь возможность изменить данные без update");
 
@@ -941,20 +942,20 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask2 = new Subtask(9999, "Subtask 1_2", TaskStatus.DONE, epicId, "Subtask description");
         taskManager.createSubtask(subtask2);
 
-        Task taskToUpdate = taskManager.getTaskById(taskId);
+        Task taskToUpdate = getTaskById(taskId);
         taskToUpdate.setStatus(TaskStatus.IN_PROGRESS);
         taskToUpdate.setDescription("new description");
         taskManager.updateTask(taskToUpdate);
 
-        Task savedTask = taskManager.getTaskById(taskId);
+        Task savedTask = getTaskById(taskId);
         assertTrue(compareTasksByFields(taskToUpdate, savedTask),
                 "Не совпадают поля переданной и сохраненной задачи");
 
-        Epic epicToUpdate = taskManager.getEpicById(epicId);
+        Epic epicToUpdate = getEpicById(epicId);
 
         // Попытка изменить статус эпика в обход менеджера задач
         epicToUpdate.setStatus(TaskStatus.DONE);
-        epicToUpdate = taskManager.getEpicById(epicId);
+        epicToUpdate = getEpicById(epicId);
 
         assertEquals(TaskStatus.IN_PROGRESS, epicToUpdate.getStatus(),
                 "Не все подзадачи завершены, должен быть статус IN_PROGRESS");
@@ -962,19 +963,19 @@ abstract class TaskManagerTest<T extends TaskManager> {
         epicToUpdate.setDescription("Новое описание");
         taskManager.updateEpic(epicToUpdate);
 
-        Epic savedEpic = taskManager.getEpicById(epicId);
+        Epic savedEpic = getEpicById(epicId);
         assertTrue(compareTasksByFields(epicToUpdate, savedEpic),
                 "Не совпадают поля переданной и сохраненной задачи");
 
-        Subtask subtask1ToUpdate = taskManager.getSubtaskById(subtaskId1);
+        Subtask subtask1ToUpdate = getSubtaskById(subtaskId1);
         subtask1ToUpdate.setStatus(TaskStatus.DONE);
         taskManager.updateSubtask(subtask1ToUpdate);
 
-        Subtask savedSubtask1 = taskManager.getSubtaskById(subtaskId1);
+        Subtask savedSubtask1 = getSubtaskById(subtaskId1);
         assertTrue(compareTasksByFields(subtask1ToUpdate, savedSubtask1),
                 "Не совпадают переданные и сохраненные поля");
 
-        savedEpic = taskManager.getEpicById(epicId);
+        savedEpic = getEpicById(epicId);
         assertEquals(TaskStatus.DONE, savedEpic.getStatus(),
                 "Все подзадачи завершены, должен быть статус DONE");
     }
@@ -1009,15 +1010,15 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.deleteSubtaskById(subtaskId2);
         assertEquals(1, taskManager.getSubtasksList().size(), "Неверное количество в списке");
 
-        epic = taskManager.getEpicById(epicId);
+        epic = getEpicById(epicId);
         assertTrue(epic.getListOfSubtasksId().contains(subtaskId1), "В эпике нет id добавленной подзадачи.");
         assertFalse(epic.getListOfSubtasksId().contains(subtaskId2), "Эпик содержит id удаленной подзадачи.");
 
         taskManager.clearSubtasks();
         assertEquals(0, taskManager.getSubtasksList().size(), "Неверное количество подзадач в списке.");
 
-        epic = taskManager.getEpicById(epicId);
-        epic2 = taskManager.getEpicById(epicId2);
+        epic = getEpicById(epicId);
+        epic2 = getEpicById(epicId2);
         assertTrue(epic.getListOfSubtasksId().isEmpty() && epic2.getListOfSubtasksId().isEmpty(),
                 "Список подзадач эпиков не пустой после очистки подзадач.");
 
@@ -1091,5 +1092,23 @@ abstract class TaskManagerTest<T extends TaskManager> {
         }
 
         return result;
+    }
+
+    Task getTaskById(int id) {
+        Optional<Task> optional = taskManager.getTaskById(id);
+        assertFalse(optional.isEmpty(), "Запрошена задача с недопустимым id");
+        return optional.get();
+    }
+
+    Epic getEpicById(int id) {
+        Optional<Epic> optional = taskManager.getEpicById(id);
+        assertFalse(optional.isEmpty(), "Запрошена задача с недопустимым id");
+        return optional.get();
+    }
+
+    Subtask getSubtaskById(int id) {
+        Optional<Subtask> optional = taskManager.getSubtaskById(id);
+        assertFalse(optional.isEmpty(), "Запрошена задача с недопустимым id");
+        return optional.get();
     }
 }

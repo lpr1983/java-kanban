@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -70,18 +71,18 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Task getTaskById(int id) {
+    public Optional<Task> getTaskById(int id) {
 
         Task task = tasks.get(id);
         if (task == null) {
-            return null;
+            return Optional.empty();
         }
         // Согласно требованию, история должна хранить версии.
         Task taskVersion = copyTask(task);
         historyManager.add(taskVersion);
 
         // Пользователю также возвращается копия объекта, чтобы изменения он мог вносить только через update.
-        return copyTask(task);
+        return Optional.of(copyTask(task));
     }
 
     @Override
@@ -163,17 +164,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Epic getEpicById(int id) {
+    public Optional<Epic> getEpicById(int id) {
 
         Epic epic = epics.get(id);
         if (epic == null) {
-            return null;
+            return Optional.empty();
         }
 
         Epic epicVersion = copyEpic(epic);
         historyManager.add(epicVersion);
 
-        return copyEpic(epic);
+        return Optional.of(copyEpic(epic));
     }
 
     @Override
@@ -243,17 +244,17 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Subtask getSubtaskById(int id) {
+    public Optional<Subtask> getSubtaskById(int id) {
 
         Subtask subtask = subtasks.get(id);
         if (subtask == null) {
-            return null;
+            return Optional.empty();
         }
 
         Subtask subtaskVersion = copySubtask(subtask);
         historyManager.add(subtaskVersion);
 
-        return copySubtask(subtask);
+        return Optional.of(copySubtask(subtask));
     }
 
     @Override
