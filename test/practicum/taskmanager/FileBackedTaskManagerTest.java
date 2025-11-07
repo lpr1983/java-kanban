@@ -20,14 +20,19 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     static TaskManager taskManager;
     static String fileName;
 
+    @Override
+    protected FileBackedTaskManager createManager() {
+        return new FileBackedTaskManager();
+    }
+
     @BeforeEach
-    void beforeEach() throws IOException {
+    void beforeEachFileBackedTaskManager() throws IOException {
         fileName = File.createTempFile("test", "csv").getAbsolutePath();
         taskManager = new FileBackedTaskManager(fileName);
     }
@@ -102,140 +107,160 @@ class FileBackedTaskManagerTest {
     }
 
     @Test
-    void createTask() throws IOException {
+    void createTaskAndCheckStoring() {
         Task task = new Task("task1", TaskStatus.NEW, "task1 description");
         int taskId = taskManager.createTask(task);
-        task = taskManager.getTaskById(taskId);
+        Task storedTask = taskManager.getTaskById(taskId);
 
-        checkRecord(task, TaskType.TASK);
+        assertDoesNotThrow(() -> {
+            checkRecord(storedTask, TaskType.TASK);
+        }, "Ошибка при работе с файлом.");
     }
 
     @Test
-    void updateTask() throws IOException {
+    void updateTaskAndCheckStoring() {
         Task task = new Task("task1", TaskStatus.NEW, "task1 description");
         int taskId = taskManager.createTask(task);
 
-        task = taskManager.getTaskById(taskId);
-        task.setDescription("updated description");
+        Task storedTask = taskManager.getTaskById(taskId);
+        storedTask.setDescription("updated description");
 
-        taskManager.updateTask(task);
+        taskManager.updateTask(storedTask);
 
-        checkRecord(task, TaskType.TASK);
+        assertDoesNotThrow(() -> {
+            checkRecord(storedTask, TaskType.TASK);
+        }, "Ошибка при работе с файлом.");
     }
 
     @Test
-    void deleteTaskById() throws IOException {
+    void deleteTaskAndCheckStoring() {
         Task task = new Task("task1", TaskStatus.NEW, "task1 description");
         int taskId = taskManager.createTask(task);
         taskManager.deleteTaskById(taskId);
-        checkFileIsEmpty();
+
+        assertDoesNotThrow(() -> checkFileIsEmpty(), "Исключение при выполнении проверки");
     }
 
     @Test
-    void clearTasks() throws IOException {
+    void clearTasksAndCheckStoring() {
         Task task = new Task("task1", TaskStatus.NEW, "task1 description");
         taskManager.createTask(task);
         taskManager.clearTasks();
-        checkFileIsEmpty();
+
+        assertDoesNotThrow(() -> checkFileIsEmpty(), "Исключение при выполнении проверки");
     }
 
     @Test
-    void clearEpics() throws IOException {
+    void clearEpicsAndCheckStoring() {
         Epic task = new Epic("task1", "task1 description");
         taskManager.createEpic(task);
         taskManager.clearEpics();
-        checkFileIsEmpty();
+
+        assertDoesNotThrow(() -> checkFileIsEmpty(), "Исключение при выполнении проверки");
     }
 
     @Test
-    void createEpic() throws IOException {
+    void createEpicAndCheckStoring() {
         Epic task = new Epic("task1", "task1 description");
         int taskId = taskManager.createEpic(task);
-        task = taskManager.getEpicById(taskId);
+        Epic storedTask = taskManager.getEpicById(taskId);
 
-        checkRecord(task, TaskType.EPIC);
+        assertDoesNotThrow(() -> checkRecord(storedTask, TaskType.EPIC), "Исключение при выполнении проверки");
     }
 
     @Test
-    void updateEpic() throws IOException {
+    void updateEpicAndCheckStoring() {
         Epic task = new Epic("task1", "task1 description");
         int taskId = taskManager.createEpic(task);
 
-        task = taskManager.getEpicById(taskId);
-        task.setDescription("updated description");
+        Epic storedTask = taskManager.getEpicById(taskId);
+        storedTask.setDescription("updated description");
 
-        taskManager.updateEpic(task);
+        taskManager.updateEpic(storedTask);
 
-        checkRecord(task, TaskType.EPIC);
+        assertDoesNotThrow(() -> checkRecord(storedTask, TaskType.EPIC), "Исключение при выполнении проверки");
     }
 
     @Test
-    void deleteEpicById() throws IOException {
+    void deleteEpicByIdAndCheckStoring() {
         Epic task = new Epic("task1", "task1 description");
         int id = taskManager.createEpic(task);
         taskManager.deleteEpicById(id);
-        checkFileIsEmpty();
+
+        assertDoesNotThrow(() -> checkFileIsEmpty(), "Исключение при выполнении проверки");
     }
 
     @Test
-    void clearSubtasks() throws IOException {
+    void clearSubtasksAndCheckStoring() {
         Epic epic = new Epic("epic", "epic description");
         int epicId = taskManager.createEpic(epic);
-        epic = taskManager.getEpicById(epicId);
+        Epic storedEpic = taskManager.getEpicById(epicId);
 
         Subtask task = new Subtask("subtask", TaskStatus.IN_PROGRESS, epicId, "st description");
         taskManager.createSubtask(task);
 
         taskManager.clearSubtasks();
 
-        checkRecord(epic, TaskType.EPIC);
+        assertDoesNotThrow(() -> checkRecord(storedEpic, TaskType.EPIC),
+                "Исключение при выполнении проверки");
     }
 
     @Test
-    void createSubtask() throws IOException {
+    void createSubtaskAndCheckStoring() {
         Epic epic = new Epic("epic", "epic description");
         int epicId = taskManager.createEpic(epic);
         taskManager.getEpicById(epicId);
 
         Subtask task = new Subtask("subtask", TaskStatus.IN_PROGRESS, epicId, "st description");
         int taskId = taskManager.createSubtask(task);
-        task = taskManager.getSubtaskById(taskId);
+        Subtask storedSubtask = taskManager.getSubtaskById(taskId);
 
-        checkRecord(task, TaskType.SUBTASK);
+        assertDoesNotThrow(() -> checkRecord(storedSubtask, TaskType.SUBTASK),
+                "Исключение при выполнении проверки");
     }
 
     @Test
-    void updateSubtask() throws IOException {
+    void updateSubtaskAndCheckStoring() {
         Epic epic = new Epic("epic", "epic description");
         int epicId = taskManager.createEpic(epic);
         taskManager.getEpicById(epicId);
 
         Subtask task = new Subtask("subtask", TaskStatus.IN_PROGRESS, epicId, "st description");
         int taskId = taskManager.createSubtask(task);
-        task = taskManager.getSubtaskById(taskId);
-        task.setStatus(TaskStatus.DONE);
-        taskManager.updateSubtask(task);
+        Subtask storedSubtask = taskManager.getSubtaskById(taskId);
+        storedSubtask.setStatus(TaskStatus.DONE);
+        taskManager.updateSubtask(storedSubtask);
 
-        checkRecord(task, TaskType.SUBTASK);
+        assertDoesNotThrow(() -> checkRecord(storedSubtask, TaskType.SUBTASK),
+                "Исключение при выполнении проверки");
     }
 
     @Test
-    void deleteSubtaskById() throws IOException {
+    void deleteSubtaskByIdAndCheckStoring() {
         Epic epic = new Epic("epic", "epic description");
         int epicId = taskManager.createEpic(epic);
-        epic = taskManager.getEpicById(epicId);
+        Epic storedEpic = taskManager.getEpicById(epicId);
 
         Subtask task = new Subtask("subtask", TaskStatus.IN_PROGRESS, epicId, "st description");
         int taskId = taskManager.createSubtask(task);
         taskManager.deleteSubtaskById(taskId);
 
-        checkRecord(epic, TaskType.EPIC);
+        assertDoesNotThrow(() -> checkRecord(storedEpic, TaskType.EPIC),
+                "Исключение при выполнении проверки");
     }
 
     @Test
-    void loadFromFile() throws IOException {
+    void loadFromFile() {
 
-        Writer writer = new FileWriter(fileName, StandardCharsets.UTF_8);
+        Writer writer = null;
+
+        try {
+            writer = new FileWriter(fileName, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            assertDoesNotThrow(() -> {
+                throw new RuntimeException(e);
+            }, e.getMessage());
+        }
 
         Task task = new Task(10, "test task", TaskStatus.NEW, "task descriprion");
         task.setStartTime(LocalDateTime.now());
@@ -251,13 +276,29 @@ class FileBackedTaskManagerTest {
         subtask.setDuration(Duration.ofDays(1));
         epic.addSubtaskId(22);
 
-        writer.write("id,type,name,status,description,epic,startTime,duration,endTime" + '\n');
-        writer.write(CsvSerializer.toCsvString(task, TaskType.TASK) + '\n');
-        writer.write(CsvSerializer.toCsvString(epic, TaskType.EPIC) + '\n');
-        writer.write(CsvSerializer.toCsvString(subtask, TaskType.SUBTASK));
-        writer.close();
+        try {
+            writer.write("id,type,name,status,description,epic,startTime,duration,endTime" + '\n');
+            writer.write(CsvSerializer.toCsvString(task, TaskType.TASK) + '\n');
+            writer.write(CsvSerializer.toCsvString(epic, TaskType.EPIC) + '\n');
+            writer.write(CsvSerializer.toCsvString(subtask, TaskType.SUBTASK));
+            writer.close();
+        } catch (IOException e) {
+            assertDoesNotThrow(() -> {
+                throw new RuntimeException(e);
+            }, e.getMessage());
+        }
 
-        taskManager = FileBackedTaskManager.loadFromFile(fileName);
+        assertThrows(IOException.class,
+                () -> FileBackedTaskManager.loadFromFile(fileName + "wrong"),
+                "При загрузке из несуществующего файла должно быть исключение");
+        try {
+            taskManager = FileBackedTaskManager.loadFromFile(fileName);
+        } catch (IOException e) {
+            assertDoesNotThrow(() -> {
+                throw new RuntimeException(e);
+            }, e.getMessage());
+        }
+
         Task loadedTask = taskManager.getTaskById(task.getId());
         Epic loadedEpic = taskManager.getEpicById(epic.getId());
         Subtask loadedSubtask = taskManager.getSubtaskById(subtask.getId());
