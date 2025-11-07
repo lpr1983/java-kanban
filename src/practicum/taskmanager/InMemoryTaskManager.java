@@ -56,8 +56,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getTasksList() {
         // Возвращаются копии объектов, чтобы пользователь мог изменить данные только через update.
-        return tasks.values().stream().
-                map(this::copyTask).toList();
+        return tasks.values().stream()
+                .map(this::copyTask).toList();
     }
 
     @Override
@@ -352,8 +352,8 @@ public class InMemoryTaskManager implements TaskManager {
             return List.of();
         }
 
-        return epic.getListOfSubtasksId().stream().
-                map(subtaskId -> copySubtask(subtasks.get(subtaskId))).toList();
+        return epic.getListOfSubtasksId().stream()
+                .map(subtaskId -> copySubtask(subtasks.get(subtaskId))).toList();
     }
 
     @Override
