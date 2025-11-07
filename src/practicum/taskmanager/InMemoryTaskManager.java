@@ -6,10 +6,10 @@ import practicum.task.Task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -41,34 +41,30 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public List<Task> getPrioritizedTasks() {
 
-        List<Task> result = new ArrayList<>();
-
-        for (Task task : prioritizedTasks) {
+        return prioritizedTasks.stream().map(task -> {
             if (task.getClass() == Task.class) {
-                result.add(copyTask(task));
+                return copyTask(task);
             } else if (task.getClass() == Subtask.class) {
-                result.add(copySubtask((Subtask) task));
+                return copySubtask((Subtask) task);
+            } else {
+                return null;
             }
-        }
-
-        return result;
+        }).filter(Objects::nonNull).toList();
     }
 
     @Override
-    public ArrayList<Task> getTasksList() {
+    public List<Task> getTasksList() {
         // Возвращаются копии объектов, чтобы пользователь мог изменить данные только через update.
-        ArrayList<Task> result = new ArrayList<>();
-        for (Task task : tasks.values()) {
-            result.add(copyTask(task));
-        }
-        return result;
+        return tasks.values().stream().
+                map(this::copyTask).toList();
     }
 
     @Override
     public void clearTasks() {
-        for (Integer i : tasks.keySet()) {
-            historyManager.remove(i);
-            prioritizedTasks.remove(tasks.get(i));
+
+        for (Map.Entry<Integer, Task> entry : tasks.entrySet()) {
+            historyManager.remove(entry.getKey());
+            prioritizedTasks.remove(entry.getValue());
         }
         tasks.clear();
     }
@@ -148,12 +144,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Epic> getEpicsList() {
-        ArrayList<Epic> result = new ArrayList<>();
-        for (Epic epic : epics.values()) {
-            result.add(copyEpic(epic));
-        }
-        return result;
+    public List<Epic> getEpicsList() {
+        return epics.values().stream().map(this::copyEpic).toList();
     }
 
     @Override
@@ -163,8 +155,9 @@ public class InMemoryTaskManager implements TaskManager {
         }
         epics.clear();
 
-        for (Integer i : subtasks.keySet()) {
-            historyManager.remove(i);
+        for (Map.Entry<Integer, Subtask> entry : subtasks.entrySet()) {
+            prioritizedTasks.remove(entry.getValue());
+            historyManager.remove(entry.getKey());
         }
         subtasks.clear();
     }
@@ -217,6 +210,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         for (int subtaskId : epic.getListOfSubtasksId()) {
+            prioritizedTasks.remove(subtasks.get(subtaskId));
             subtasks.remove(subtaskId);
             historyManager.remove(subtaskId);
         }
@@ -228,21 +222,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Subtask> getSubtasksList() {
-        ArrayList<Subtask> result = new ArrayList<>();
-        for (Subtask subtask : subtasks.values()) {
-            result.add(copySubtask(subtask));
-        }
-        return result;
+    public List<Subtask> getSubtasksList() {
+        return subtasks.values().stream().map(this::copySubtask).toList();
     }
 
     @Override
     public void clearSubtasks() {
-        for (Integer i : subtasks.keySet()) {
-            historyManager.remove(i);
-            prioritizedTasks.remove(subtasks.get(i));
+
+        for (Map.Entry<Integer, Subtask> entry: subtasks.entrySet()) {
+            historyManager.remove(entry.getKey());
+            prioritizedTasks.remove(entry.getValue());
         }
         subtasks.clear();
+
         for (Epic epic : epics.values()) {
             epic.clearSubtasksId();
             calculateAndSetEpicStatus(epic);
@@ -351,20 +343,16 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public ArrayList<Subtask> getSubtasksOfEpic(int epicId) {
-        ArrayList<Subtask> result = new ArrayList<>();
+    public List<Subtask> getSubtasksOfEpic(int epicId) {
 
         Epic epic = epics.get(epicId);
+
         if (epic == null) {
-            return result;
+            return List.of();
         }
 
-        for (int subtaskId : epic.getListOfSubtasksId()) {
-            Subtask subtask = copySubtask(subtasks.get(subtaskId));
-            result.add(subtask);
-        }
-
-        return result;
+        return epic.getListOfSubtasksId().stream().
+                map(subtaskId -> copySubtask(subtasks.get(subtaskId))).toList();
     }
 
     @Override

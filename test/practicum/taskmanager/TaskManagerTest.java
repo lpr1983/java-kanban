@@ -486,6 +486,44 @@ class TaskManagerTest {
     }
 
     @Test
+    void getPrioritizedClearEpics() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        taskManager.createSubtask(subtask1);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        taskManager.clearEpics();
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, sortedTasks.size(), "getPrioritizedTasks должен быть пустой");
+    }
+
+    @Test
+    void getPrioritizedDeleteEpic() {
+        LocalDateTime testTime = LocalDateTime.now();
+
+        Epic epic = new Epic("Epic1", "");
+        int epicId = taskManager.createEpic(epic);
+
+        Subtask subtask1 = new Subtask("subtask 1", TaskStatus.NEW, epicId, "");
+        subtask1.setStartTime(testTime);
+        taskManager.createSubtask(subtask1);
+
+        List<Task> sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(1, sortedTasks.size(), "Неправильный размер списка getPrioritizedTasks");
+
+        taskManager.deleteEpicById(epicId);
+        sortedTasks = taskManager.getPrioritizedTasks();
+        assertEquals(0, sortedTasks.size(), "getPrioritizedTasks должен быть пустой");
+    }
+
+    @Test
     void getPrioritizedTasksSortsOrder() {
         LocalDateTime testTime = LocalDateTime.now();
 
