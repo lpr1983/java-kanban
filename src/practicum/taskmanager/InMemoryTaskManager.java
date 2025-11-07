@@ -229,7 +229,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void clearSubtasks() {
 
-        for (Map.Entry<Integer, Subtask> entry: subtasks.entrySet()) {
+        for (Map.Entry<Integer, Subtask> entry : subtasks.entrySet()) {
             historyManager.remove(entry.getKey());
             prioritizedTasks.remove(entry.getValue());
         }

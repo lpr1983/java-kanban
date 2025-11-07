@@ -19,7 +19,7 @@ class InMemoryHistoryManagerTest {
     void add() {
         int historySize = 1000;
         for (int i = 1; i <= historySize; i++) {
-            Task newTask = new Task(i,"Task" + i, TaskStatus.NEW, "" );
+            Task newTask = new Task(i, "Task" + i, TaskStatus.NEW, "");
             historyManager.add(newTask);
         }
 
@@ -64,7 +64,7 @@ class InMemoryHistoryManagerTest {
     void remove() {
         int historySize = 10;
         for (int i = 1; i <= historySize; i++) {
-            Task newTask = new Task(i,"Task" + i, TaskStatus.NEW, "" );
+            Task newTask = new Task(i, "Task" + i, TaskStatus.NEW, "");
             historyManager.add(newTask);
         }
 

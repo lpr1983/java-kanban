@@ -1,4 +1,4 @@
- package practicum.taskmanager;
+package practicum.taskmanager;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
- class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest {
     static TaskManager taskManager;
     static String fileName;
 
