@@ -6,6 +6,7 @@ import practicum.task.Task;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,16 +23,7 @@ public class InMemoryTaskManager implements TaskManager {
     private final HistoryManager historyManager = Managers.getDefaultHistory();
 
     private final Set<Task> prioritizedTasks = new TreeSet<>(
-            (task1, task2) -> {
-
-                int result = task1.getStartTime().compareTo(task2.getStartTime());
-
-                if (result == 0) {
-                    result = task1.getId() - task2.getId();
-                }
-
-                return result;
-            }
+            Comparator.comparing(Task::getStartTime).thenComparing(Task::getId)
     );
 
     private int getNextId() {
@@ -405,7 +397,7 @@ public class InMemoryTaskManager implements TaskManager {
             if (epicDuration == null) {
                 epicDuration = Duration.ZERO;
             }
-            epicDuration = epicDuration.plus(subtask.getDuration());
+            epicDuration = epicDuration.plus(subtaskDuration);
 
             if (epicStartTime == null) {
                 epicStartTime = subtaskStartTime;
@@ -427,7 +419,6 @@ public class InMemoryTaskManager implements TaskManager {
         epic.setEndTime(epicEndTime);
         epic.setStartTime(epicStartTime);
         epic.setDuration(epicDuration);
-
     }
 
 
@@ -508,10 +499,13 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected boolean taskOverlapsWithOtherTask(Task taskToCheck) {
 
+        if (taskToCheck.getStartTime() == null || taskToCheck.getDuration() == null) {
+            return false;
+        }
+
         return prioritizedTasks.stream().anyMatch(
                 task -> !task.equals(taskToCheck) && tasksOverlap(task, taskToCheck)
         );
-
     }
 
     public static boolean tasksOverlap(Task task1, Task task2) {
