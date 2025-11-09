@@ -2,6 +2,8 @@ package practicum.task;
 
 import practicum.taskmanager.TaskStatus;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -9,6 +11,8 @@ public class Task {
     protected String name;
     protected String description;
     protected TaskStatus status;
+    protected LocalDateTime startTime;
+    protected Duration duration;
 
     public Task(String name, TaskStatus status, String description) {
         this.name = name;
@@ -21,6 +25,39 @@ public class Task {
         this.name = name;
         this.status = status;
         this.description = description;
+    }
+
+    public Task(int id, String name, TaskStatus status, String description, LocalDateTime startTime, Duration duration) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+        this.description = description;
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        }
+
+        return startTime.plus(duration);
     }
 
     public int getId() {
@@ -57,12 +94,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description.length='" + description.length() + '\'' +
-                ", status=" + status +
-                '}';
+        return "Task{" + "id=" + id + ", name='" + name + '\'' + ", description.length='" + description.length() + '\'' + ", status=" + status + '}';
     }
 
     @Override

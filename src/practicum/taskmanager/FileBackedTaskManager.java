@@ -63,11 +63,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
                 if (rs.getTaskType() == TaskType.TASK) {
                     taskManager.putTaskWithoutAnyActions(task);
+                    taskManager.putTaskToPrioritizedTasks(task);
                 } else if (rs.getTaskType() == TaskType.EPIC) {
                     taskManager.putEpicWithoutAnyActions((Epic) task);
                 } else if (rs.getTaskType() == TaskType.SUBTASK) {
                     Subtask subtask = (Subtask) task;
+
                     taskManager.putSubtaskWithoutAnyActions(subtask);
+                    taskManager.putTaskToPrioritizedTasks(subtask);
 
                     int epicId = subtask.getEpicId();
                     List<Integer> listOfSubtasksId = subtasksIdOfEpics.getOrDefault(epicId, new ArrayList<>());
@@ -168,7 +171,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try (Writer writer = new FileWriter(fileName, StandardCharsets.UTF_8)) {
 
-            String csvHeader = "id,type,name,status,description,epic";
+            String csvHeader = "id,type,name,status,description,epic,startTime,duration,endTime";
             writer.write(csvHeader);
 
             for (Task task : getTasksList()) {
