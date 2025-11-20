@@ -81,7 +81,7 @@ public class InMemoryTaskManager implements TaskManager {
     public int createTask(Task newTask) {
 
         if (taskOverlapsWithOtherTask(newTask)) {
-            throw new IllegalArgumentException("Task overlaps with other task");
+            throw new OverlapTasksException("Task overlaps with other task");
         }
 
         // У пользователя не должен быть объект, хранимый в менеджере, чтобы он мог менять данные задачи только путем вызова update.
@@ -106,7 +106,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (taskOverlapsWithOtherTask(task)) {
-            throw new IllegalArgumentException("Task overlaps with other task");
+            throw new OverlapTasksException("Task overlaps with other task");
         }
 
         Task storedTask = tasks.get(taskId);
@@ -258,7 +258,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (taskOverlapsWithOtherTask(newSubtask)) {
-            throw new IllegalArgumentException("Task overlaps with other task");
+            throw new OverlapTasksException("Task overlaps with other task");
         }
 
         int newId = getNextId();
@@ -296,7 +296,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (taskOverlapsWithOtherTask(subtask)) {
-            throw new IllegalArgumentException("Task overlaps with other task");
+            throw new OverlapTasksException("Task overlaps with other task");
         }
 
         Subtask subtaskToSave = copySubtask(subtask);
