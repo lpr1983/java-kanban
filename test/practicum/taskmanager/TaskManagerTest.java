@@ -677,7 +677,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         task3.setStartTime(testTime.plusDays(1));
         task3.setDuration(Duration.ofDays(1));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.createTask(task3));
+        Assertions.assertThrows(OverlapTasksException.class, () -> taskManager.createTask(task3));
 
         Epic epic = new Epic("Epic", "");
         int epicId = taskManager.createEpic(epic);
@@ -692,7 +692,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Subtask subtask2 = new Subtask("subtask2", TaskStatus.NEW, epicId, "");
         subtask2.setStartTime(testTime.plusHours(12));
         subtask2.setDuration(Duration.ofDays(1));
-        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.createSubtask(subtask2));
+        Assertions.assertThrows(OverlapTasksException.class, () -> taskManager.createSubtask(subtask2));
     }
 
     @Test
@@ -717,7 +717,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         // Обновление с пересечением
         Task taskToCheck = getTaskById(taskId2);
         taskToCheck.setStartTime(testTime);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.updateTask(taskToCheck));
+        Assertions.assertThrows(OverlapTasksException.class, () -> taskManager.updateTask(taskToCheck));
 
         Epic epic = new Epic("Epic", "");
         int epicId = taskManager.createEpic(epic);
@@ -733,7 +733,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
 
         // Обновление с пересечением
         subtaskToCheck.setStartTime(testTime);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> taskManager.updateSubtask(subtaskToCheck));
+        Assertions.assertThrows(OverlapTasksException.class, () -> taskManager.updateSubtask(subtaskToCheck));
     }
 
     @Test
