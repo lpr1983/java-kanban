@@ -39,7 +39,7 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
                 || !path.startsWith(basePath)
                 || path.endsWith("/")
         ) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange);
             return;
         }
 
@@ -76,7 +76,7 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
             }
             handleGetTaskById(exchange);
         } else {
-            sendNotFound(exchange);
+            sendBadRequest(exchange);
         }
     }
 
@@ -86,7 +86,7 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
                 StandardCharsets.UTF_8);
 
         if (!path.equals(basePath)) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange);
             return;
         }
 
@@ -99,10 +99,6 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
         if (task.getId() == 0) {
             handleCreateTask(exchange, task);
         } else {
-            if (taskType == TaskType.EPIC) {
-                sendBadRequest(exchange);
-                return;
-            }
             handleUpdateTask(exchange, task);
         }
     }
@@ -111,7 +107,7 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
         String path = exchange.getRequestURI().getPath();
 
         if (!path.startsWith(basePath + "/")) {
-            sendNotFound(exchange);
+            sendBadRequest(exchange);
             return;
         }
         handleDeleteTaskById(exchange);
@@ -180,7 +176,7 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
             updateResult = switch (taskType) {
                 case TASK -> taskManager.updateTask(task);
                 case SUBTASK -> taskManager.updateSubtask((Subtask) task);
-                case EPIC -> throw new IllegalArgumentException("Doesn't allow for epic");
+                case EPIC -> taskManager.updateEpic((Epic) task);
             };
         } catch (OverlapTasksException exception) {
             sendHasOverlaps(exchange);

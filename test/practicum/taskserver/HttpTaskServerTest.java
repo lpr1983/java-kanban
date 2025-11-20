@@ -12,6 +12,7 @@ import practicum.task.TaskType;
 import practicum.taskmanager.InMemoryTaskManager;
 import practicum.taskmanager.TaskManager;
 import practicum.taskmanager.TaskStatus;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -49,16 +50,16 @@ class HttpTaskServerTest {
             String basePath = HttpTaskServer.getPathForTaskType(taskType);
 
             response = sendRequest("http://localhost:8080" + basePath + "//123", "GET", "");
-            assertEquals(404, response.statusCode());
+            assertEquals(400, response.statusCode());
 
             response = sendRequest("http://localhost:8080" + basePath + "/", "GET", "");
-            assertEquals(404, response.statusCode());
+            assertEquals(400, response.statusCode());
 
             response = sendRequest("http://localhost:8080" + basePath + "/test", "GET", "");
             assertEquals(400, response.statusCode());
 
             response = sendRequest("http://localhost:8080" + basePath + "/123", "POST", "");
-            assertEquals(404, response.statusCode());
+            assertEquals(400, response.statusCode());
 
             response = sendRequest("http://localhost:8080" + basePath, "PATCH", "");
             assertEquals(405, response.statusCode());
@@ -116,7 +117,7 @@ class HttpTaskServerTest {
         assertEquals(200, httpResponse.statusCode());
 
         String responseBody = httpResponse.body();
-        List<Subtask> tasksList = gson.fromJson(responseBody, new EpicListTypeToken().getType());
+        List<Epic> tasksList = gson.fromJson(responseBody, new EpicListTypeToken().getType());
 
         assertEquals(expectedList, tasksList, "Не совпадает с ожидаемым списков");
     }
@@ -125,7 +126,7 @@ class HttpTaskServerTest {
     void getTaskById() {
         Task task = createNewTaskWithTime("task");
         int taskId = taskManager.createTask(task);
-        task = taskManager.getTaskById(taskId).get();
+        task = assertDoesNotThrow(() -> taskManager.getTaskById(taskId).orElseThrow());
 
         HttpResponse<String> httpResponse = sendRequest("http://localhost:8080/tasks/" + taskId, "GET", "");
         assertEquals(200, httpResponse.statusCode());
@@ -151,7 +152,7 @@ class HttpTaskServerTest {
         subtask.setStartTime(LocalDateTime.now());
         subtask.setDuration(Duration.ofDays(1));
         int subtaskId = taskManager.createSubtask(subtask);
-        Subtask expectedSubtask = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).get());
+        Subtask expectedSubtask = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).orElseThrow());
 
         HttpResponse<String> httpResponse = sendRequest("http://localhost:8080/subtasks/" + subtaskId, "GET", "");
         assertEquals(200, httpResponse.statusCode());
@@ -173,7 +174,7 @@ class HttpTaskServerTest {
         Epic epic = new Epic("epic", "");
         int epicId = taskManager.createEpic(epic);
 
-        Epic expectedEpic = assertDoesNotThrow(() -> taskManager.getEpicById(epicId).get());
+        Epic expectedEpic = assertDoesNotThrow(() -> taskManager.getEpicById(epicId).orElseThrow());
 
         HttpResponse<String> httpResponse = sendRequest("http://localhost:8080/epics/" + epicId, "GET", "");
         assertEquals(200, httpResponse.statusCode());
@@ -200,12 +201,12 @@ class HttpTaskServerTest {
         assertEquals(201, httpResponse.statusCode());
 
         int taskId = assertDoesNotThrow(() -> Integer.parseInt(httpResponse.body()));
-        assertDoesNotThrow(() -> taskManager.getTaskById(taskId).get());
+        assertDoesNotThrow(() -> taskManager.getTaskById(taskId).orElseThrow());
 
         Task taskWithOverlap = createNewTaskWithTime("task2");
 
         requestBody = gson.toJson(taskWithOverlap);
-        HttpResponse httpResponse2 = sendRequest("http://localhost:8080/tasks", "POST", requestBody);
+        HttpResponse<String> httpResponse2 = sendRequest("http://localhost:8080/tasks", "POST", requestBody);
         assertEquals(406, httpResponse2.statusCode());
     }
 
@@ -224,14 +225,14 @@ class HttpTaskServerTest {
         assertEquals(201, httpResponse.statusCode());
 
         int subtaskId = assertDoesNotThrow(() -> Integer.parseInt(httpResponse.body()));
-        assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).get());
+        assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).orElseThrow());
 
         Subtask subtaskWithOverlap = new Subtask("subtask with overlap", TaskStatus.NEW, epicId, "");
         subtaskWithOverlap.setStartTime(LocalDateTime.now());
         subtaskWithOverlap.setDuration(Duration.ofDays(1));
 
         requestBody = gson.toJson(subtaskWithOverlap);
-        HttpResponse httpResponse2 = sendRequest("http://localhost:8080/subtasks", "POST", requestBody);
+        HttpResponse<String> httpResponse2 = sendRequest("http://localhost:8080/subtasks", "POST", requestBody);
         assertEquals(406, httpResponse2.statusCode());
     }
 
@@ -245,7 +246,7 @@ class HttpTaskServerTest {
         assertEquals(201, httpResponse.statusCode());
 
         int epicId = assertDoesNotThrow(() -> Integer.parseInt(httpResponse.body()));
-        assertDoesNotThrow(() -> taskManager.getEpicById(epicId).get());
+        assertDoesNotThrow(() -> taskManager.getEpicById(epicId).orElseThrow());
     }
 
     @Test
@@ -253,7 +254,7 @@ class HttpTaskServerTest {
         Task task = createNewTaskWithTime("task");
         int taskId = taskManager.createTask(task);
 
-        Task createdTask = assertDoesNotThrow(() -> taskManager.getTaskById(taskId).get());
+        Task createdTask = assertDoesNotThrow(() -> taskManager.getTaskById(taskId).orElseThrow());
         createdTask.setDescription("Обновление");
 
         String requestBody = gson.toJson(createdTask);
@@ -261,13 +262,13 @@ class HttpTaskServerTest {
 
         assertEquals(201, httpResponse.statusCode());
 
-        Task updatedTask = assertDoesNotThrow(() -> taskManager.getTaskById(taskId).get());
+        Task updatedTask = assertDoesNotThrow(() -> taskManager.getTaskById(taskId).orElseThrow());
         assertEquals(createdTask.getDescription(), updatedTask.getDescription());
 
         Task taskWithOverlap = createNewTaskWithTime("task2");
         taskWithOverlap.setStartTime(LocalDateTime.now().plusDays(2));
         int taskWithOverlapId = taskManager.createTask(taskWithOverlap);
-        taskWithOverlap = assertDoesNotThrow(() -> taskManager.getTaskById(taskWithOverlapId).get());
+        taskWithOverlap = assertDoesNotThrow(() -> taskManager.getTaskById(taskWithOverlapId).orElseThrow());
 
         taskWithOverlap.setStartTime(LocalDateTime.now());
 
@@ -291,7 +292,7 @@ class HttpTaskServerTest {
         subtask.setDuration(Duration.ofDays(1));
         int subtaskId = taskManager.createSubtask(subtask);
 
-        Subtask createdSubtask = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).get());
+        Subtask createdSubtask = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).orElseThrow());
         createdSubtask.setDescription("Обновление");
 
         String requestBody = gson.toJson(createdSubtask);
@@ -299,7 +300,7 @@ class HttpTaskServerTest {
 
         assertEquals(201, httpResponse.statusCode());
 
-        Subtask updatedSubtask = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).get());
+        Subtask updatedSubtask = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskId).orElseThrow());
         assertEquals(createdSubtask.getDescription(), updatedSubtask.getDescription());
 
         Subtask subtaskWithOverlap = new Subtask("subtask with overlap", TaskStatus.NEW, epicId, "");
@@ -307,7 +308,7 @@ class HttpTaskServerTest {
         subtaskWithOverlap.setDuration(Duration.ofDays(1));
         int subtaskWithOverlapId = taskManager.createSubtask(subtaskWithOverlap);
 
-        subtaskWithOverlap = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskWithOverlapId).get());
+        subtaskWithOverlap = assertDoesNotThrow(() -> taskManager.getSubtaskById(subtaskWithOverlapId).orElseThrow());
         subtaskWithOverlap.setStartTime(LocalDateTime.now());
 
         HttpResponse<String> httpResponse2 = sendRequest("http://localhost:8080/subtasks", "POST",
@@ -325,13 +326,16 @@ class HttpTaskServerTest {
         Epic epic = new Epic("epic", "");
         int epicId = taskManager.createEpic(epic);
 
-        Epic epicToUpdate = assertDoesNotThrow(() -> taskManager.getEpicById(epicId).get());
+        Epic epicToUpdate = assertDoesNotThrow(() -> taskManager.getEpicById(epicId).orElseThrow());
         epicToUpdate.setDescription("Обновление");
 
         String requestBody = gson.toJson(epicToUpdate);
         HttpResponse<String> httpResponse = sendRequest("http://localhost:8080/epics", "POST", requestBody);
 
-        assertEquals(400, httpResponse.statusCode());
+        assertEquals(201, httpResponse.statusCode());
+
+        Epic updatedEpic = assertDoesNotThrow(() -> taskManager.getEpicById(epicId).orElseThrow());
+        assertEquals(epicToUpdate.getDescription(), updatedEpic.getDescription());
     }
 
     @Test
@@ -407,8 +411,8 @@ class HttpTaskServerTest {
         Task task2 = new Epic("task2", "");
         int taskId2 = taskManager.createTask(task2);
 
-        assertDoesNotThrow( ()->taskManager.getTaskById(taskId).get());
-        assertDoesNotThrow( ()->taskManager.getTaskById(taskId2).get());
+        assertDoesNotThrow(() -> taskManager.getTaskById(taskId).orElseThrow());
+        assertDoesNotThrow(() -> taskManager.getTaskById(taskId2).orElseThrow());
 
         List<Task> expectedHistory = taskManager.getHistory();
 
@@ -460,29 +464,30 @@ class HttpTaskServerTest {
         return task;
     }
 
-    HttpResponse sendRequest(String path, String method, String body) {
+    HttpResponse<String> sendRequest(String path, String method, String body) {
 
-        HttpClient client = HttpClient.newBuilder()
+        try (HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(5))
-                .build();
+                .build()) {
 
-        URI url = URI.create(path);
+            URI url = URI.create(path);
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .method(method, HttpRequest.BodyPublishers.ofString(body))
-                .uri(url)
-                .header("Accept", "application/json")
-                .build();
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .method(method, HttpRequest.BodyPublishers.ofString(body))
+                    .uri(url)
+                    .header("Accept", "application/json")
+                    .build();
 
-        return assertDoesNotThrow(() -> client.send(httpRequest, HttpResponse.BodyHandlers.ofString()));
+            return assertDoesNotThrow(() -> client.send(httpRequest, HttpResponse.BodyHandlers.ofString()));
+        }
     }
 
-    class TaskListTypeToken extends TypeToken<List<Task>> {
+    static class TaskListTypeToken extends TypeToken<List<Task>> {
     }
 
-    class SubtaskListTypeToken extends TypeToken<List<Subtask>> {
+    static class SubtaskListTypeToken extends TypeToken<List<Subtask>> {
     }
 
-    class EpicListTypeToken extends TypeToken<List<Epic>> {
+    static class EpicListTypeToken extends TypeToken<List<Epic>> {
     }
 }
