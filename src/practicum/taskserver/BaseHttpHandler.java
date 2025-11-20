@@ -30,11 +30,6 @@ public class BaseHttpHandler {
         sendText(exchange, "Has overlaps", 406);
     }
 
-    void sendDoesntAllow(HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().add("Allow", "GET, POST");
-        sendText(exchange, "Doesn't allow", 405);
-    }
-
     void sendInternalServerError(HttpExchange exchange) throws IOException {
         sendText(exchange, "Internal server error", 500);
     }

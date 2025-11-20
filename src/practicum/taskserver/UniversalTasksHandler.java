@@ -56,7 +56,8 @@ public class UniversalTasksHandler extends BaseHttpHandler implements HttpHandle
                     processDELETE(exchange);
                     break;
                 default:
-                    sendDoesntAllow(exchange);
+                    exchange.getResponseHeaders().add("Allow", "GET, POST");
+                    sendText(exchange, "Doesn't allow", 405);
             }
         } catch (Exception exception) {
             sendInternalServerError(exchange);

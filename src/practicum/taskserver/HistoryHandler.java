@@ -29,7 +29,8 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
             if (method.equals("GET")) {
                 sendJson(exchange, gson.toJson(taskManager.getHistory()));
             } else {
-                sendDoesntAllow(exchange);
+                exchange.getResponseHeaders().add("Allow", "GET");
+                sendText(exchange, "Doesn't allow", 405);
             }
         } catch (Exception exception) {
             sendInternalServerError(exchange);
