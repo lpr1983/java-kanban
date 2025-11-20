@@ -23,46 +23,46 @@ public class GsonForTasks {
                 .registerTypeAdapter(Duration.class, new DurationAdapter())
                 .create();
     }
-}
 
-class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
-    private static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+    static class LocalDateTimeAdapter extends TypeAdapter<LocalDateTime> {
+        private static final DateTimeFormatter dtf = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
-    @Override
-    public void write(JsonWriter jsonWriter, LocalDateTime localDateTime) throws IOException {
-        if (localDateTime == null) {
-            jsonWriter.nullValue();
-        } else {
-            jsonWriter.value(localDateTime.format(dtf));
+        @Override
+        public void write(JsonWriter jsonWriter, LocalDateTime localDateTime) throws IOException {
+            if (localDateTime == null) {
+                jsonWriter.nullValue();
+            } else {
+                jsonWriter.value(localDateTime.format(dtf));
+            }
+        }
+
+        @Override
+        public LocalDateTime read(JsonReader jsonReader) throws IOException {
+            String value = jsonReader.nextString();
+            if (value == null) {
+                return null;
+            }
+            return LocalDateTime.parse(value, dtf);
         }
     }
 
-    @Override
-    public LocalDateTime read(JsonReader jsonReader) throws IOException {
-        String value = jsonReader.nextString();
-        if (value == null) {
-            return null;
+    static class DurationAdapter extends TypeAdapter<Duration> {
+        @Override
+        public void write(JsonWriter jsonWriter, Duration duration) throws IOException {
+            if (duration == null) {
+                jsonWriter.nullValue();
+            } else {
+                jsonWriter.value(duration.toString());
+            }
         }
-        return LocalDateTime.parse(value, dtf);
-    }
-}
 
-class DurationAdapter extends TypeAdapter<Duration> {
-    @Override
-    public void write(JsonWriter jsonWriter, Duration duration) throws IOException {
-        if (duration == null) {
-            jsonWriter.nullValue();
-        } else {
-            jsonWriter.value(duration.toString());
+        @Override
+        public Duration read(JsonReader jsonReader) throws IOException {
+            String value = jsonReader.nextString();
+            if (value == null) {
+                return null;
+            }
+            return Duration.parse(value);
         }
-    }
-
-    @Override
-    public Duration read(JsonReader jsonReader) throws IOException {
-        String value = jsonReader.nextString();
-        if (value == null) {
-            return null;
-        }
-        return Duration.parse(value);
     }
 }
